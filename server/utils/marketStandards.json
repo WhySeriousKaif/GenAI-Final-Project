@@ -1,0 +1,30 @@
+{
+  "terminationNotice": {
+    "standard": "30 days",
+    "description": "Notice period for convenience termination should be 30 days. Shorter or immediate termination is unfavourable; longer notice (90+ days) is unusual."
+  },
+  "paymentPeriod": {
+    "standard": "30 days",
+    "description": "Standard invoice payment term is Net 30 days. Net 60 or Net 90 are unfavourable for service providers, while Net 15 or immediate is favourable."
+  },
+  "liabilityCap": {
+    "standard": "1x Contract Value",
+    "description": "Limitation of liability capped at 1x the fees paid under the contract is market standard. Unlimited liability or extreme caps are unfavourable."
+  },
+  "governingLaw": {
+    "standard": "Neutral / Delaware / Local Jurisdiction",
+    "description": "Governing law should align with the main operational territory. Foreign jurisdictions (e.g. outside the US/UK/Local) are unusual or unfavourable."
+  },
+  "ipOwnership": {
+    "standard": "Customer owns work product; Vendor retains pre-existing IP",
+    "description": "Customer should own deliverables they paid for. Vendor must keep their background tools and libraries. Vendor owning all work product is unfavourable."
+  },
+  "indemnity": {
+    "standard": "Mutual IP infringement and third-party claims only",
+    "description": "Indemnity should be mutual and capped, limited to intellectual property claims. Uncapped or one-sided general indemnity is unfavourable."
+  },
+  "confidentiality": {
+    "standard": "Mutual obligations, 3-5 years duration post-termination",
+    "description": "Confidentiality must bind both parties (mutual). Term should be limited rather than indefinite, except for trade secrets."
+  }
+}
