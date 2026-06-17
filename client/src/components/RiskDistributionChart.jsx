@@ -1,15 +1,10 @@
 // =========================================================================
 // Risk Distribution Donut Chart (Recharts)
 // =========================================================================
-// This component aggregates clause risks and draws a beautiful, interactive 
-// donut pie chart showing the density of risks by category.
-// Categories: Financial, Operational, Legal, Reputational.
-
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const RiskDistributionChart = ({ contracts }) => {
-  // Aggregate data from all contracts
   const counts = {
     Financial: 0,
     Operational: 0,
@@ -32,21 +27,20 @@ const RiskDistributionChart = ({ contracts }) => {
     value: counts[key]
   })).filter(item => item.value > 0);
 
-  // Fallback if no data is available
   if (data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-slate-400 text-sm">
+      <div className="h-64 flex items-center justify-center text-muted text-xs">
         No clause risk data available. Upload a contract to populate graphs.
       </div>
     );
   }
 
-  // Curated professional color palette
+  // Warm editorial palette
   const COLORS = {
-    Financial: '#fb7185',    // Rose
-    Operational: '#fbbf24',  // Amber
-    Legal: '#38bdf8',        // Sky
-    Reputational: '#a78bfa'  // Purple
+    Financial: '#cc785c',    // coral (primary)
+    Operational: '#d4a017',  // warm amber
+    Legal: '#5db872',        // sage green
+    Reputational: '#8b7355'  // warm brown
   };
 
   return (
@@ -63,22 +57,23 @@ const RiskDistributionChart = ({ contracts }) => {
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#94a3b8'} />
+              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#8e8b82'} />
             ))}
           </Pie>
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: '#1e293b', 
-              borderColor: '#334155', 
+              backgroundColor: '#faf9f5', 
+              borderColor: '#e6dfd8', 
               borderRadius: '8px',
-              color: '#f8fafc'
+              color: '#141413',
+              fontSize: '11px'
             }} 
           />
           <Legend 
             verticalAlign="bottom" 
             height={36} 
             iconType="circle"
-            formatter={(value) => <span className="text-slate-300 text-xs">{value}</span>}
+            formatter={(value) => <span style={{ color: '#6c6a64', fontSize: '11px' }}>{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>

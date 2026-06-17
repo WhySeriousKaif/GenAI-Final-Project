@@ -1,108 +1,115 @@
 /* =========================================================================
-   Global Tailwind CSS Imports & Professional Typography System (Tailwind v4)
+   Claude Warm-Editorial Design System & Foundation (Tailwind v4)
    ========================================================================= */
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;650&display=swap');
 
 /* Tailwind v4 Custom Theme Extension */
 @theme {
-  --color-navy-50: #f0f3f6;
-  --color-navy-100: #d1d6e2;
-  --color-navy-200: #a3adc4;
-  --color-navy-300: #7583a6;
-  --color-navy-400: #4c5a88;
-  --color-navy-500: #303d6e;
-  --color-navy-600: #212c58;
-  --color-navy-700: #1b2347;
-  --color-navy-800: #161b36;
-  --color-navy-850: #12152b;
-  --color-navy-900: #111422; /* Sleek Card Background */
-  --color-navy-950: #080a11; /* Main Canvas Midnight */
+  /* Warm-Editorial Color Palette */
+  --color-canvas: #faf9f5;
+  --color-surface-soft: #f5f0e8;
+  --color-surface-card: #efe9de;
+  --color-surface-cream-strong: #e8e0d2;
+  --color-surface-dark: #181715;
+  --color-surface-dark-elevated: #252320;
+  --color-surface-dark-soft: #1f1e1b;
   
-  --color-accent-500: #2563eb; /* Royal Blue Accent */
-  --color-accent-600: #1d4ed8;
-  --color-gold-500: #eab308;   /* Gold Accent */
-  --color-gold-600: #ca8a04;
+  --color-primary: #cc785c;
+  --color-primary-active: #a9583e;
+  --color-primary-disabled: #e6dfd8;
+  
+  --color-ink: #141413;
+  --color-body-strong: #252523;
+  --color-body: #3d3d3a;
+  --color-muted: #6c6a64;
+  --color-muted-soft: #8e8b82;
+  --color-hairline: #e6dfd8;
+  --color-hairline-soft: #ebe6df;
+  
+  --color-success: #5db872;
+  --color-warning: #d4a017;
+  --color-error: #c64545;
 
+  /* Typography Fonts */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
   body {
-    @apply bg-navy-950 text-slate-100 antialiased selection:bg-accent-500/30 selection:text-white font-sans;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.12) 0px, transparent 40%),
-      radial-gradient(at 100% 100%, rgba(234, 179, 8, 0.04) 0px, transparent 40%);
-    background-attachment: fixed;
+    @apply bg-canvas text-body antialiased font-sans selection:bg-primary/20 selection:text-ink;
   }
   
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink tracking-tight font-medium;
   }
 }
 
 /* =========================================================================
-   Premium Custom UI Utility Classes (Modern Portal Aesthetics)
+   Premium Custom UI Components (Warm Editorial Theme)
    ========================================================================= */
 @layer components {
-  /* Crisp, solid cards matching the Scaler Student Portal cards */
+  /* Warm editorial cream content card */
   .glass-card {
-    @apply bg-navy-900 border border-[#1f243d] rounded-xl shadow-lg transition-all duration-300;
+    @apply bg-surface-card border border-hairline rounded-xl shadow-sm transition-all duration-300;
   }
   
   .glass-card-hover {
-    @apply hover:bg-[#15192b] hover:border-[#2b3254] hover:shadow-xl hover:-translate-y-0.5;
+    @apply hover:bg-surface-cream-strong hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  /* Dark navy mockup card */
+  .dark-card {
+    @apply bg-surface-dark border border-surface-dark-elevated text-white rounded-xl shadow-md p-6;
   }
 
   /* Sleek modern inputs */
   .glass-input {
-    @apply w-full bg-navy-950 border border-[#1f243d] rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50 transition-all duration-200;
+    @apply w-full bg-canvas border border-hairline rounded-lg px-3 py-2 text-xs text-ink placeholder-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200;
   }
 
-  /* Premium Royal Blue Buttons - Tighter and smaller */
+  /* Signature Coral Buttons */
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold px-4 py-2 rounded-lg shadow-md shadow-blue-950/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-primary hover:bg-primary-active text-white font-semibold px-4 py-2 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
   }
 
-  /* Secondary outline/navy button style - Tighter and smaller */
+  /* Secondary outline button style */
   .btn-secondary {
-    @apply bg-[#161a2e] hover:bg-[#1e233d] text-slate-200 border border-[#1f243d] font-bold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-canvas hover:bg-surface-soft text-ink border border-hairline font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
   }
 
-  /* Danger Red Button - Tighter and smaller */
+  /* Secondary button for dark containers */
+  .btn-secondary-dark {
+    @apply bg-surface-dark-elevated hover:bg-surface-dark-soft text-white border border-surface-dark-soft font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+  }
+
+  /* Danger Red Button */
   .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold px-4 py-2 rounded-lg shadow-md shadow-red-950/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-error hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
   }
 }
 
-/* =========================================================================
-   Custom Animations & Interactive Effects
-   ========================================================================= */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(1.03);
-  }
-}
-
-.animate-glow {
-  animation: pulse-glow 6s infinite ease-in-out;
-}
-
-/* Modern Minimalist Scrollbars */
+/* Scrollbar Tweaks */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-navy-950;
+  @apply bg-canvas;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-[#1f243d] rounded-full hover:bg-[#2b3254] transition-colors;
+  @apply bg-hairline rounded-full hover:bg-surface-cream-strong transition-colors;
+}
+
+/* Dark scrollbars */
+.dark-scroll::-webkit-scrollbar-track {
+  @apply bg-surface-dark;
+}
+
+.dark-scroll::-webkit-scrollbar-thumb {
+  @apply bg-surface-dark-elevated rounded-full hover:bg-surface-dark-soft transition-colors;
 }

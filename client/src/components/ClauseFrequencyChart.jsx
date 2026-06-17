@@ -1,15 +1,10 @@
 // =========================================================================
 // Clause Type Frequency Bar Chart (Recharts)
 // =========================================================================
-// This component displays a bar chart of clause frequency across all ingested 
-// documents. It helps users see which clauses are most commonly examined 
-// (e.g. Indemnity, Payment Terms, Termination, etc.).
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const ClauseFrequencyChart = ({ contracts }) => {
-  // Initialize type frequencies
   const frequencies = {
     'Indemnity': 0,
     'Limitation of Liability': 0,
@@ -37,14 +32,14 @@ const ClauseFrequencyChart = ({ contracts }) => {
 
   if (data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-slate-400 text-sm">
+      <div className="h-64 flex items-center justify-center text-muted text-xs">
         No clause frequency data available. Upload contracts to view charts.
       </div>
     );
   }
 
-  // Curated color gradients or colors for bars
-  const COLORS = ['#38bdf8', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b'];
+  // Warm editorial bar colors
+  const COLORS = ['#cc785c', '#d4a017', '#5db872', '#8b7355', '#a9583e', '#6c6a64', '#3d3d3a'];
 
   return (
     <div className="w-full h-64">
@@ -55,24 +50,25 @@ const ClauseFrequencyChart = ({ contracts }) => {
         >
           <XAxis 
             dataKey="name" 
-            tick={{ fill: '#94a3b8', fontSize: 10 }}
+            tick={{ fill: '#6c6a64', fontSize: 9 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis 
-            tick={{ fill: '#94a3b8', fontSize: 10 }} 
+            tick={{ fill: '#6c6a64', fontSize: 9 }} 
             allowDecimals={false}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{ 
-              backgroundColor: '#1e293b', 
-              borderColor: '#334155', 
+              backgroundColor: '#faf9f5', 
+              borderColor: '#e6dfd8', 
               borderRadius: '8px',
-              color: '#f8fafc'
+              color: '#141413',
+              fontSize: '11px'
             }}
-            cursor={{ fill: 'rgba(51, 65, 85, 0.3)' }}
+            cursor={{ fill: 'rgba(204, 120, 92, 0.06)' }}
           />
           <Bar dataKey="frequency" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
