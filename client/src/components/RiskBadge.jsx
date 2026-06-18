@@ -5,6 +5,9 @@
 // - Green/Safe: Favourable terms (0-30 risk score)
 // - Yellow/Caution: Unusual/Medium terms (31-70 risk score)
 // - Red/Warning: Unfavourable/High terms (71-100 risk score)
+//
+// NOTE: Uses theme-aware CSS classes from index.css (.badge-*) instead of
+// hardcoded Tailwind color utilities so badges correctly adapt to dark mode.
 
 import React from 'react';
 
@@ -15,19 +18,19 @@ import React from 'react';
 export const RiskScoreBadge = ({ score }) => {
   const numScore = Number(score);
   let label = 'Low';
-  let colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  let badgeClass = 'badge-low';
 
   if (numScore > 70) {
     label = 'High Risk';
-    colorClass = 'bg-red-50 text-error border-red-200';
+    badgeClass = 'badge-high';
   } else if (numScore > 30) {
     label = 'Medium Risk';
-    colorClass = 'bg-amber-50 text-warning border-amber-200';
+    badgeClass = 'badge-medium';
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}`}>
-      <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+    <span className={badgeClass}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
       {score}% - {label}
     </span>
   );
@@ -38,22 +41,22 @@ export const RiskScoreBadge = ({ score }) => {
  * @param {string} status - Favourable, Unfavourable, or Unusual
  */
 export const MarketStatusBadge = ({ status }) => {
-  let colorClass = 'bg-surface-card text-body border-hairline';
+  let badgeClass = 'badge-market-neutral';
 
   switch (status) {
     case 'Favourable':
-      colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      badgeClass = 'badge-market-favourable';
       break;
     case 'Unfavourable':
-      colorClass = 'bg-red-50 text-error border-red-200';
+      badgeClass = 'badge-market-unfavourable';
       break;
     case 'Unusual':
-      colorClass = 'bg-amber-50 text-warning border-amber-200';
+      badgeClass = 'badge-market-unusual';
       break;
   }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${colorClass}`}>
+    <span className={badgeClass}>
       {status}
     </span>
   );
