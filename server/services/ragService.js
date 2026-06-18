@@ -1,27 +1,19 @@
 // =========================================================================
 // In-Memory Retrieval-Augmented Generation (RAG) Service
 // =========================================================================
-// This service allows users to "chat" with a contract document.
-//
-// RAG WORKFLOW:
-// 1. Chunking: We break the large contract text into smaller overlapping paragraphs.
-// 2. Vectorization: We compute mathematical vectors for each chunk.
-//    - If GEMINI_API_KEY is available: We use the official Gemini Embedding API (text-embedding-004).
-//    - If running Offline: We generate lightweight term-frequency vectors (TF-IDF overlap).
-// 3. Vector Search: When a user asks a question, we vectorize the query and calculate 
-//    cosine similarity to find the most relevant chunks in memory.
-// 4. Augmentation: We feed the relevant chunks into the Gemini prompt as context to answer.
+// Lets users "chat" with a contract. Retrieval prefers cached online embeddings
+// (one query embedding per question); offline it uses a TF-IDF keyword vectorizer.
+// All vendor-specific embedding/answer calls go through the LLMProvider layer —
+// this service owns only chunking, similarity math, caching policy, and retrieval.
 
 const {
-  getGeminiClient,
   EMBEDDING_MODEL,
   CHUNK_SIZE,
   CHUNK_OVERLAP,
+  TOP_K,
   MAX_DOC_BYTES
 } = require('../config/aiConfig');
-
-// Shared Gemini client (null in offline/mock mode) — config centralized in aiConfig.
-const genAI = getGeminiClient();
+const { getProvider } = require('./llm');
 
 /**
  * Splits a long text string into smaller chunks with overlapping text.
@@ -44,9 +36,7 @@ const chunkText = (text, chunkSize = CHUNK_SIZE, chunkOverlap = CHUNK_OVERLAP) =
 };
 
 /**
- * Computes Cosine Similarity between two numerical arrays.
- * Cosine similarity measures the cosine of the angle between two vectors,
- * outputting a score between -1 and 1 (where 1 is identical direction).
+ * Computes Cosine Similarity between two numerical arrays (range -1..1).
  */
 const cosineSimilarity = (vecA, vecB) => {
   let dotProduct = 0.0;
@@ -66,20 +56,18 @@ const cosineSimilarity = (vecA, vecB) => {
 // =========================================================================
 // OFFLINE TERM-FREQUENCY VECTORIZER (Fallback Mode)
 // =========================================================================
-// A simple custom vectorizer for offline work. It maps unique words in the
-// text and computes a Term Frequency vector for each chunk.
 
 const computeTFVector = (text, vocabulary) => {
   const words = text.toLowerCase().match(/\b[a-z0-9]+\b/g) || [];
   const vector = new Array(vocabulary.length).fill(0);
-  
+
   words.forEach(word => {
     const idx = vocabulary.indexOf(word);
     if (idx !== -1) {
       vector[idx] += 1;
     }
   });
-  
+
   return vector;
 };
 
@@ -88,7 +76,6 @@ const buildVocabulary = (chunks) => {
   chunks.forEach(chunk => {
     const words = chunk.toLowerCase().match(/\b[a-z0-9]+\b/g) || [];
     words.forEach(word => {
-      // Ignore very short stop words to improve keyword match quality
       if (word.length > 2) {
         vocabSet.add(word);
       }
@@ -97,59 +84,14 @@ const buildVocabulary = (chunks) => {
   return Array.from(vocabSet);
 };
 
-// =========================================================================
-// MAIN RAG INTERACTION PIPELINE
-// =========================================================================
-
 /**
- * Searches the contract text for the top matching chunks based on the query.
+ * OFFLINE retrieval: TF-IDF keyword overlap over freshly chunked text.
+ * Used when no online embeddings are available (offline mode or cache failure).
  */
-const searchRelevantContext = async (contractText, query, topK = 3) => {
+const searchRelevantContext = async (contractText, query, topK = TOP_K) => {
   const chunks = chunkText(contractText);
-  
   if (chunks.length === 0) return '';
 
-  // Case 1: Online Mode (using Gemini text-embedding-004 API)
-  if (genAI) {
-    try {
-      const embedModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
-
-      // Embed the user's query
-      const queryEmbedResult = await embedModel.embedContent(query);
-      const queryVector = queryEmbedResult.embedding.values;
-
-      // Embed each text chunk
-      const chunkVectors = await Promise.all(
-        chunks.map(async (chunk) => {
-          try {
-            const res = await embedModel.embedContent(chunk);
-            return { chunk, vector: res.embedding.values };
-          } catch (e) {
-            // Fallback for single chunk failure
-            return { chunk, vector: null };
-          }
-        })
-      );
-
-      // Compute similarity score for chunks that embedded successfully
-      const scoredChunks = chunkVectors
-        .filter(cv => cv.vector !== null)
-        .map(cv => {
-          const score = cosineSimilarity(queryVector, cv.vector);
-          return { chunk: cv.chunk, score };
-        });
-
-      // Sort descending by score and pick top K
-      scoredChunks.sort((a, b) => b.score - a.score);
-      const topMatches = scoredChunks.slice(0, topK).map(item => item.chunk);
-      return topMatches.join('\n\n');
-
-    } catch (error) {
-      console.error(`[RAG Embedding Error]: ${error.message}. Falling back to TF-IDF vector search.`);
-    }
-  }
-
-  // Case 2: Offline Fallback Mode (TF-IDF keyword overlap vectorizer)
   try {
     const vocabulary = buildVocabulary(chunks);
     const queryVector = computeTFVector(query, vocabulary);
@@ -161,44 +103,33 @@ const searchRelevantContext = async (contractText, query, topK = 3) => {
     });
 
     scoredChunks.sort((a, b) => b.score - a.score);
-    const topMatches = scoredChunks.slice(0, topK).map(item => item.chunk);
-    return topMatches.join('\n\n');
+    return scoredChunks.slice(0, topK).map(item => item.chunk).join('\n\n');
   } catch (error) {
     console.error(`[RAG TF-IDF Error]: ${error.message}`);
-    // Absolute basic fallback - return first 3 chunks
     return chunks.slice(0, topK).join('\n\n');
   }
 };
 
 /**
- * Generates online (Gemini) embeddings for every chunk of a contract's text.
- * This is the EXPENSIVE step — run once at upload time (or lazily on first chat),
- * never per question. Returns null in offline mode or if embedding fails entirely,
- * so callers can degrade gracefully without ever blocking upload/chat.
+ * Generates online embeddings for every chunk of a contract's text via the
+ * provider. Expensive — run once at upload (or lazily on first chat), never per
+ * question. Returns null offline or on total failure so callers degrade safely.
  */
 const generateEmbeddings = async (rawText) => {
-  if (!genAI) return null; // Online-only cache; offline TF-IDF stays compute-on-demand.
+  const provider = getProvider();
+  if (!provider.canEmbed) return null; // Online-only cache.
 
   const chunks = chunkText(rawText);
   if (chunks.length === 0) return null;
 
   try {
-    const embedModel = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+    const vectors = await provider.embed(chunks);
 
-    // Embed all chunks; tolerate individual chunk failures (keep what succeeds).
-    const results = await Promise.all(
-      chunks.map(async (chunk, index) => {
-        try {
-          const res = await embedModel.embedContent(chunk);
-          return { index, text: chunk, vector: res.embedding.values };
-        } catch (e) {
-          console.error(`[RAG Embed] Chunk ${index} failed: ${e.message}`);
-          return null;
-        }
-      })
-    );
-
-    const embedded = results.filter(Boolean);
+    // Keep chunks that embedded successfully, preserving order/text mapping.
+    const embedded = [];
+    vectors.forEach((vector, index) => {
+      if (vector) embedded.push({ index, text: chunks[index], vector });
+    });
     if (embedded.length === 0) return null;
 
     return {
@@ -216,10 +147,8 @@ const generateEmbeddings = async (rawText) => {
 };
 
 /**
- * Estimates whether storing these embeddings keeps the contract document under
- * MongoDB's 16MB ceiling. Conservative byte accounting: raw text + chunk text +
- * 8 bytes per vector float. If it doesn't fit, the caller skips persistence and
- * falls back to compute-on-demand for that (rare, very large) contract.
+ * Conservative byte estimate to keep the contract document under MongoDB's 16MB
+ * ceiling before caching vectors. If it doesn't fit, skip persistence.
  */
 const fitsDocLimit = (rawText, embeddings) => {
   if (!embeddings || !embeddings.chunks) return false;
@@ -231,14 +160,11 @@ const fitsDocLimit = (rawText, embeddings) => {
 };
 
 /**
- * Fast retrieval path: embeds ONLY the user's query, then runs cosine similarity
- * against the precomputed chunk vectors. This is the whole point of the cache —
- * one embedding call per question instead of one-per-chunk.
+ * Fast retrieval: embeds ONLY the query, then cosine-ranks against cached vectors.
  */
-const searchWithCachedVectors = async (cachedChunks, query, topK = 3) => {
-  const embedModel = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-  const queryEmbedResult = await embedModel.embedContent(query);
-  const queryVector = queryEmbedResult.embedding.values;
+const searchWithCachedVectors = async (cachedChunks, query, topK = TOP_K) => {
+  const [queryVector] = await getProvider().embed([query]);
+  if (!queryVector) throw new Error('Query embedding failed');
 
   const scored = cachedChunks.map(c => ({
     chunk: c.text,
@@ -250,14 +176,12 @@ const searchWithCachedVectors = async (cachedChunks, query, topK = 3) => {
 };
 
 /**
- * Resolves the most relevant context for a question, preferring the cached
- * online embeddings. If a contract has no valid cache (e.g. uploaded before this
- * feature, or caching was skipped), it computes once, persists, and self-heals.
- * Falls back to the original on-demand path (TF-IDF offline / full re-embed) on
- * any failure so chat never breaks.
+ * Resolves the most relevant context, preferring cached online embeddings.
+ * Lazily computes + persists for un-cached contracts (self-heal), and falls back
+ * to the offline TF-IDF retriever on any failure so chat never breaks.
  */
-const retrieveContext = async (contract, question, topK = 3) => {
-  if (genAI) {
+const retrieveContext = async (contract, question, topK = TOP_K) => {
+  if (getProvider().canEmbed) {
     try {
       const cached = contract.embeddings;
       const validCache =
@@ -268,7 +192,6 @@ const retrieveContext = async (contract, question, topK = 3) => {
 
       let chunksToUse = validCache ? cached.chunks : null;
 
-      // Lazy compute + persist for un-cached contracts (backfill self-heal).
       if (!chunksToUse) {
         const generated = await generateEmbeddings(contract.rawText);
         if (generated && generated.chunks.length > 0) {
@@ -302,81 +225,19 @@ const retrieveContext = async (contract, question, topK = 3) => {
 };
 
 /**
- * Core chat handler that executes vector search and queries Gemini (or mock responses) to answer.
+ * Core chat handler: retrieve context (cache-first), then delegate answer
+ * generation to the provider (Gemini online with offline keyword fallback).
  */
 const queryContract = async (contract, question) => {
-  // 1. Perform semantic retrieval to pull matching passages (cache-first)
-  const contextText = await retrieveContext(contract, question, 3);
-
+  const contextText = await retrieveContext(contract, question, TOP_K);
   console.log(`[RAG] Found context length: ${contextText.length} characters.`);
 
-  // 2. Query Gemini model using context
-  if (genAI) {
-    try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-      
-      const prompt = `
-        You are a highly helpful legal assistant for the Legal Document Intelligence System.
-        Your goal is to answer questions about a legal contract using ONLY the provided verified context.
-        If the answer cannot be found in the context, be honest and state that the contract does not mention it.
-        Keep your answer clear, educational, and easy for a non-lawyer to understand.
-
-        Verified Contract Context:
-        ${contextText}
-
-        User Question:
-        ${question}
-
-        Answer:
-      `;
-
-      const result = await model.generateContent(prompt);
-      return {
-        answer: result.response.text(),
-        contextUsed: contextText,
-        mode: 'AI (Gemini)'
-      };
-    } catch (error) {
-      console.error(`[RAG AI Generation Error]: ${error.message}`);
-    }
-  }
-
-  // 3. Fallback / Mock Answers (Offline Mode)
-  // Generates intelligent mock answers by matching common keywords in the question
-  const lowerQ = question.toLowerCase();
-  let answer = "";
-  
-  if (lowerQ.includes('risk') || lowerQ.includes('problem')) {
-    answer = `Based on our offline analysis of the document context, the primary risks involve potential uncapped liabilities in the Limitation of Liability section (Section 9.1) and a relatively short notice period in the Termination section (Section 4.2).`;
-  } else if (lowerQ.includes('termination') || lowerQ.includes('cancel') || lowerQ.includes('notice')) {
-    const termClause = contract.extractedClauses.find(c => c.clauseType === 'Termination');
-    answer = termClause 
-      ? `The termination clause states: "${termClause.clauseText}". This clause is evaluated as having a risk score of ${termClause.riskScore} because: ${termClause.reason}`
-      : "The contract contains standard terms for termination, typically requiring 30 days written notice.";
-  } else if (lowerQ.includes('payment') || lowerQ.includes('fees') || lowerQ.includes('invoice')) {
-    const payClause = contract.extractedClauses.find(c => c.clauseType === 'Payment Terms');
-    answer = payClause 
-      ? `According to the Payment Terms: "${payClause.clauseText}". This is rated with a risk score of ${payClause.riskScore} because: ${payClause.reason}`
-      : "Standard payment terms are Net 30 days upon receipt of invoice.";
-  } else if (lowerQ.includes('ip') || lowerQ.includes('own') || lowerQ.includes('intellectual')) {
-    const ipClause = contract.extractedClauses.find(c => c.clauseType === 'IP Ownership');
-    answer = ipClause 
-      ? `Regarding Intellectual Property: "${ipClause.clauseText}". This has a risk score of ${ipClause.riskScore} because: ${ipClause.reason}`
-      : "Standard terms state that the Customer owns custom work product and deliverables, while the Vendor retains pre-existing tools.";
-  } else if (lowerQ.includes('liability') || lowerQ.includes('cap') || lowerQ.includes('limit')) {
-    const liabClause = contract.extractedClauses.find(c => c.clauseType === 'Limitation of Liability');
-    answer = liabClause 
-      ? `Regarding Limitation of Liability: "${liabClause.clauseText}". This is rated ${liabClause.riskScore} because: ${liabClause.reason}`
-      : "Standard limitation cap is 1x contract value or fees paid in the past 12 months.";
-  } else {
-    // If no keywords match, extract matching text block
-    answer = `I parsed the contract context offline. The document mentions details that may answer your query. Relevant snippet:\n\n"${contextText.substring(0, 300)}..."`;
-  }
+  const result = await getProvider().answer(contextText, question, contract);
 
   return {
-    answer: answer,
+    answer: result.answer,
     contextUsed: contextText,
-    mode: 'Offline Parser (Local Keyword Match)'
+    mode: result.mode
   };
 };
 
