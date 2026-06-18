@@ -1,136 +1,244 @@
-# Legal Document Intelligence System (LegalAI)
+# Legal Document Intelligence System (LegalAI / LexiCore)
 
-A full-stack, educational, and developer-friendly **Legal Document Intelligence System** built using the MERN stack (MongoDB, Express, React, Node.js). 
+A full-stack **Legal Document Intelligence System** built on the MERN stack (MongoDB, Express, React, Node.js).
 
-This system helps users automate the parsing of commercial agreements (PDF and DOCX), extract core clauses (Indemnity, Payment Terms, Limitation of Liability, etc.), analyze risk profiles using AI, compare clauses across contracts side-by-side, search keywords globally, and interact with documents using a **Retrieval-Augmented Generation (RAG)** chatbot.
+It automates the parsing of commercial agreements (PDF & DOCX), extracts core clauses (Indemnity, Payment Terms, Limitation of Liability, etc.), scores their risk with AI, compares clauses across contracts, searches keywords globally, and lets you chat with a document via a cached **Retrieval-Augmented Generation (RAG)** pipeline.
+
+The backend is built around clean **Low-Level Design (LLD)** principles: a vendor-agnostic LLM provider abstraction, data-driven rule engines, a thin-controller/service split, centralized configuration and error handling, and a Jest test suite. The app degrades gracefully — it runs fully **offline** (no Gemini key, no Neo4j) without ever crashing.
 
 ---
 
 ## 🏗️ System Architecture & Data Flow
 
-The diagram below maps how documents are uploaded, processed through text extraction, analyzed by the Gemini Cognitive Pipeline, indexed in Mongoose and Neo4j, and searched using the in-memory RAG vector space:
+Documents are ingested, processed by a swappable LLM provider (Gemini online / heuristic mock offline), persisted in MongoDB, mirrored into a Neo4j graph (or an in-memory fallback), and queried through a cache-first RAG pipeline.
 
 ```mermaid
-graph TD
-    %% Ingestion
-    User([User Client]) -->|Upload PDF/DOCX| Express[Express server.js]
-    Express -->|File Buffer| TextExt[textExtractor.js]
-    TextExt -->|pdf-parse / mammoth| RawText[Raw Text String]
-    
-    %% AI Cognitive Pipeline
-    RawText -->|Request Analysis| AIService[aiService.js]
-    AIService -->|Google Gemini API| AIResponse[JSON Clauses & Risk Scores]
-    AIService -.->|Offline Regex Fallback| AIResponse
-    
-    %% Storage
-    AIResponse -->|Save Contract Document| Mongo[(MongoDB Atlas)]
-    AIResponse -->|Sync Clauses & References| NeoService[neo4jService.js]
-    NeoService -->|Cypher Queries| Neo4j[(Neo4j Graph Database)]
-    NeoService -.->|Fallback In-Memory Graph| Neo4j
-    
-    %% RAG Pipeline
-    RawText -->|Generate Chunks & Embeddings| RAG[ragService.js]
-    User -->|Ask Question| ChatRoute[chatController.js]
-    ChatRoute -->|Query Similarity Search| RAG
-    RAG -->|Fetch Text Chunks| GeminiEmbeddings[Gemini Embeddings / TF-IDF]
-    GeminiEmbeddings -->|Formulate Context| LLMAnswer[Gemini Answer Synthesis]
-    LLMAnswer -->|Response + Source Drawer| User
+flowchart TB
+    User(["User Client<br/>React + Vite"])
+
+    subgraph API["API Layer - Express"]
+        direction TB
+        Routes["contractRoutes<br/>Multer upload + JWT"]
+        Chat["chatController"]
+    end
+
+    subgraph CORE["Service Layer"]
+        direction TB
+        Ingest["contractIngestionService<br/>orchestrates the pipeline"]
+        TextExt["textExtractor<br/>extractorRegistry, pdf-parse, mammoth"]
+        RAG["ragService<br/>chunk, cosine, cache"]
+    end
+
+    subgraph AI["LLM Provider Layer"]
+        direction TB
+        Provider{{"Provider Factory"}}
+        Gemini["GeminiProvider<br/>gemini-2.5-flash<br/>text-embedding-004"]
+        Mock["MockProvider<br/>rule registries, TF-IDF"]
+        Provider -->|online| Gemini
+        Provider -.->|offline / on-error| Mock
+    end
+
+    subgraph DATA["Persistence"]
+        direction TB
+        Mongo[("MongoDB<br/>contracts + cached vectors")]
+        Neo4j[("Neo4j Graph<br/>in-memory fallback")]
+    end
+
+    %% Ingestion flow
+    User ==>|Upload PDF/DOCX| Routes
+    Routes ==> Ingest
+    Ingest ==> TextExt
+    Ingest -->|analyze, summarize, embed| Provider
+    Ingest ==>|save| Mongo
+    Ingest -->|sync graph| Neo4j
+
+    %% RAG chat flow
+    User ==>|Ask question| Chat
+    Chat ==> RAG
+    RAG -->|embed query only| Mongo
+    RAG -->|retrieve, answer| Provider
+    Provider ==>|answer + source drawer| User
+
+    %% Styling
+    classDef client fill:#1e293b,stroke:#0ea5e9,stroke-width:2px,color:#f1f5f9
+    classDef api fill:#0c4a6e,stroke:#38bdf8,color:#e0f2fe
+    classDef core fill:#1e3a5f,stroke:#60a5fa,color:#dbeafe
+    classDef ai fill:#3b0764,stroke:#c084fc,color:#f3e8ff
+    classDef data fill:#064e3b,stroke:#34d399,color:#d1fae5
+
+    class User client
+    class Routes,Chat api
+    class Ingest,TextExt,RAG core
+    class Provider,Gemini,Mock ai
+    class Mongo,Neo4j data
 ```
 
 ---
 
 ## ✨ Core Features
 
-1. **Document Ingestion Portal:** Upload `.pdf` (via `pdf-parse`) and `.docx` (via `mammoth`) legal agreements. Includes automated sample generation utility for easy validation.
-2. **AI Clause Extraction:** Isolates 7 critical clauses: *Payment Terms, Termination, Limitation of Liability, Indemnity, IP Ownership, Governing Law, and Confidentiality*.
-3. **Automated Risk Assessment:** Computes an individual risk score (0-100%) and generates detailed justifications for each clause.
-4. **Market Standard Comparison:** Ranks terms as *Favourable, Unfavourable, or Unusual* and provides comparative arguments.
-5. **Executive Summary Panel:** AI-synthesized commercial purpose, obligations, and top-3 negotiation recommendations.
-6. **Side-by-Side Comparator Grid:** Compare selected clauses across multiple contracts to identify inconsistencies.
-7. **RAG Contract Chat Console:** Chat with single contracts. Includes a side-drawer showing the exact document context blocks retrieved by vector similarity.
-8. **Interactive SVG Relationship Graph:** Renders node-link views mapping contracts to clauses and drawing cross-references.
-9. **Admin Panel Status Monitor:** Real-time health checks on MongoDB, Gemini API, and Neo4j with a single-click database reset button.
+1. **Document Ingestion Portal** — upload `.pdf` (via `pdf-parse`) and `.docx` (via `mammoth`). A generator utility creates sample contracts for quick validation.
+2. **AI Clause Extraction** — isolates 7 critical clauses: *Payment Terms, Termination, Limitation of Liability, Indemnity, IP Ownership, Governing Law, Confidentiality*.
+3. **Automated Risk Assessment** — per-clause risk score (0–100) with plain-English justifications.
+4. **Market Standard Comparison** — ranks terms as *Favourable, Unfavourable, or Unusual* with comparative reasoning.
+5. **Executive Summary Panel** — AI-synthesized purpose, parties, obligations, top risks, and negotiation recommendations.
+6. **Side-by-Side Comparator Grid** — compare selected clauses across multiple contracts.
+7. **Cached RAG Chat Console** — chat with a contract; a side-drawer shows the exact context chunks retrieved by vector similarity. Embeddings are computed **once at upload** and reused (one query embedding per question).
+8. **Interactive Relationship Graph** — node-link view mapping contracts → clauses with cross-references.
+9. **JWT Authentication & Roles** — register/login with `user` / `admin` roles; all contract & chat routes are protected; admin-only database reset.
+10. **Admin Status Monitor** — live health checks for MongoDB, Gemini, and Neo4j with a one-click reset.
+11. **Light/Dark Theme** — persisted theme toggle, plus clause copy-to-clipboard and JSON report export.
 
 ---
 
 ## 🛠️ Technology Stack
 
-*   **Frontend:** React, Vite, Tailwind CSS (v4), Recharts, Lucide React, Axios, React Router (v7).
-*   **Backend:** Node.js, Express.js, Multer (multipart uploads).
-*   **Database:** MongoDB & Mongoose (primary metadata), Neo4j & Cypher Driver (cross-references, optional).
-*   **AI Engine:** Google Gemini Generative AI (Gemini 2.5/Flash) or offline regex-based parsing fallback.
-*   **Document Parsers:** Mammoth (DOCX) and PDF-Parse (PDF).
-*   **Sample Generator:** PDFKit.
+* **Frontend:** React 19, Vite, Tailwind CSS v4, Recharts, Lucide React, Axios, React Router v7.
+* **Backend:** Node.js, Express.js, Multer (multipart uploads), JWT (`jsonwebtoken`), `bcryptjs`.
+* **Database:** MongoDB & Mongoose (primary store), Neo4j & Cypher driver (graph cross-references, optional).
+* **AI Engine:** Google Gemini (`gemini-2.5-flash` for analysis/chat, `text-embedding-004` for embeddings) with an offline heuristic fallback.
+* **Document Parsers:** Mammoth (DOCX), PDF-Parse (PDF). **Sample Generator:** PDFKit.
+* **Testing:** Jest + Supertest (backend), ESLint (frontend).
+
+---
+
+## 🧱 Backend Architecture (LLD)
+
+The backend follows a layered design so responsibilities stay isolated and extensible:
+
+```
+server/
+├── config/
+│   ├── aiConfig.js          # Single source of truth: Gemini client, model ids, tunables
+│   └── db.js                # MongoDB connection
+├── constants/
+│   └── clauseTypes.js       # Shared clause taxonomy + risk/market enums
+├── controllers/             # Thin HTTP layer (validate → delegate → respond)
+│   ├── contractController.js
+│   └── chatController.js
+├── services/
+│   ├── contractIngestionService.js   # Owns the upload pipeline (SRP)
+│   ├── textExtractor.js              # Validate + dispatch to extractor registry
+│   ├── ragService.js                 # Chunking, similarity, embedding cache, retrieval
+│   ├── riskScoring.js                # Shared risk-averaging helper
+│   ├── neo4jService.js               # Graph sync / purge (lazy init, no import side-effects)
+│   ├── aiService.js                  # Thin facade over the provider layer
+│   ├── llm/                          # LLM Provider abstraction (DIP / OCP / ISP)
+│   │   ├── LLMProvider.js            #   interface
+│   │   ├── GeminiProvider.js         #   online implementation
+│   │   ├── MockProvider.js           #   offline heuristic implementation
+│   │   ├── FallbackProvider.js       #   Gemini-with-offline-fallback composite
+│   │   └── index.js                  #   provider factory (singleton)
+│   └── rules/                        # Data-driven rule registries (OCP)
+│       ├── clauseRules.js            #   clause extraction registry + engine
+│       ├── answerRules.js            #   offline chat intent registry
+│       └── extractorRegistry.js      #   file-extension → parser map
+├── dto/                     # API serializers (decouple responses from DB schema)
+│   ├── contractDTO.js       #   omits rawText / embeddings / __v
+│   └── userDTO.js           #   never serializes the password hash
+├── errors/AppError.js       # Operational error with HTTP status code
+├── middleware/
+│   ├── auth.js              # JWT protect + role authorize
+│   ├── asyncHandler.js      # Forwards async errors to the central handler
+│   └── errorHandler.js      # Single uniform error response
+├── models/                  # Mongoose schemas (Contract w/ cached embeddings, User)
+├── routes/                  # auth / contracts / chat routers
+├── tests/                   # Jest + Supertest suite (DB-free, network-free)
+└── server.js                # App bootstrap
+```
+
+**Design highlights**
+- **Dependency Inversion:** business logic depends on the `LLMProvider` interface, not on the Gemini SDK. Swapping providers = a new subclass, no consumer edits.
+- **Open/Closed:** clause types, chat intents, and file formats are declarative registry entries — the engines never change.
+- **Single Responsibility:** controllers only translate HTTP; the ingestion pipeline lives in a service.
+- **Resilience:** `FallbackProvider` transparently degrades Gemini → offline heuristics per operation, so the app never crashes on a missing key or API error.
+- **Embedding cache:** chunk vectors are computed once at upload and stored on the contract (under MongoDB's 16 MB doc limit); chat embeds only the query. Old contracts self-heal on first chat.
 
 ---
 
 ## 📡 Backend API Endpoints
 
-### 1. Contract Management
-*   `POST /api/contracts/upload`
-    *   **Description:** Uploads and analyzes a PDF/DOCX file.
-    *   **Payload:** `multipart/form-data` containing `contract` file.
-*   `GET /api/contracts`
-    *   **Description:** Retrieves all contract summary metadata.
-    *   **Query params:** `?search=filename` to filter results.
-*   `GET /api/contracts/:id`
-    *   **Description:** Retrieves full contract details, extracted clauses, executive summary, and SVG graph representation.
-*   `DELETE /api/contracts/:id`
-    *   **Description:** Deletes a contract, its metadata, and its graph representation.
+> All `/api/contracts` and `/api/chat` routes require a `Authorization: Bearer <token>` header.
 
-### 2. Global Search
-*   `GET /api/contracts/search`
-    *   **Description:** Scans all contract contents and clause texts for keyword matches.
-    *   **Query params:** `?q=searchterm`
+### 1. Authentication
+* `POST /api/auth/register` — create a user. Body: `{ username, email, password, role? }`. Returns a JWT.
+* `POST /api/auth/login` — authenticate. Body: `{ username, password }`. Returns a JWT.
+* `GET /api/auth/me` — current user profile *(protected)*.
 
-### 3. RAG Chat
-*   `POST /api/chat/:id`
-    *   **Description:** Chats with a contract. Performs semantic similarity chunk matching and synthesizes an AI answer.
-    *   **Payload:** `{ "question": "Who owns the IP?" }`
+### 2. Contract Management *(protected)*
+* `POST /api/contracts/upload` — upload & analyze. Payload: `multipart/form-data` with a `contract` file.
+* `GET /api/contracts` — list contract summaries. Query: `?search=filename`.
+* `GET /api/contracts/:id` — full details: clauses, executive summary, and graph nodes.
+* `DELETE /api/contracts/:id` — delete a contract and its graph representation.
 
-### 4. Admin Utilities
-*   `GET /api/admin/status`
-    *   **Description:** Evaluates connections of MongoDB, Gemini API, and Neo4j.
-*   `POST /api/admin/reset-db`
-    *   **Description:** Deletes all database records.
+### 3. Global Search *(protected)*
+* `GET /api/contracts/search?q=term` — scans titles and clause texts for matches.
+
+### 4. RAG Chat *(protected)*
+* `POST /api/chat/:id` — chat with a contract. Body: `{ "question": "Who owns the IP?" }`.
+
+### 5. Admin Utilities *(protected)*
+* `GET /api/admin/status` — connectivity of MongoDB, Gemini, and Neo4j.
+* `POST /api/admin/reset-db` — wipe all records *(admin role only)*.
 
 ---
 
 ## 🚀 Installation & Local Launch
 
-### Step 1: Environment Configurations
-Create a `.env` file in the `server/` directory (see `server/.env.example`):
+### Step 1: Environment Configuration
+Create a `.env` file in `server/` (see `server/.env.example`):
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/legal_doc_intel
 GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_KEY
+JWT_SECRET=change_this_to_a_long_random_secret
 NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
+NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=yourpassword
 ```
-*(If `GEMINI_API_KEY` is omitted, the application runs in Offline Heuristics mode. If Neo4j parameters are omitted or connection fails, the application switches to in-memory graph construction.)*
+> If `GEMINI_API_KEY` is omitted, the app runs in **Offline Heuristics** mode (and skips embedding caching, using TF-IDF retrieval). If Neo4j parameters are omitted or unreachable, it falls back to an **in-memory graph**.
 
-### Step 2: Initialize & Run Backend
-Navigate to the server directory, install node modules, generate sample files, and boot the server:
+### Step 2: Backend
 ```bash
 cd server
 npm install
-npm run generate-docs   # Generates Standard, Risky, and Unusual PDF contracts inside sample-contracts/
-npm start               # Starts Express server on http://localhost:5000
+npm run generate-docs   # Generates sample Standard / Risky / Unusual PDFs in sample-contracts/
+npm start               # Express on http://localhost:5000
 ```
 
-### Step 3: Initialize & Run Frontend
-In a new terminal window, navigate to the client directory, install modules, and run the development bundle:
+### Step 3: Frontend
 ```bash
 cd client
 npm install
-npm run dev             # Starts Vite development server on http://localhost:5173
+npm run dev             # Vite dev server on http://localhost:5173
 ```
+
+### Step 4: First login
+Use the **Login** page's one-click demo buttons (auto-registers a `demouser` / `demoadmin`), or register your own account.
+
+---
+
+## ✅ Testing & Quality
+
+```bash
+# Backend — Jest + Supertest (no DB or network required; runs in offline/mock mode)
+cd server
+npm test
+
+# Frontend — ESLint
+cd client
+npm run lint
+npm run build           # production build
+```
+
+The backend suite (8 suites / 41 tests) characterizes the AI/RAG/extraction layers and covers the provider abstraction, rule registries, ingestion pipeline, DTO serializers, and the unified error handler. The tests are intentionally **DB-free and network-free** so they run deterministically anywhere.
 
 ---
 
 ## 💡 Academic & Viva Presentation Tips
 
-1.  **Offline Resiliency Demo:** If your college does not provide stable internet access during your viva, the app will **never crash**. The backend detects the lack of a Gemini key and activates the regex-based fallback engine, still showing simulated risk scores, reasons, and graph linkages.
-2.  **RAG Explanation:** Highlight the **RAG Context Source** panel in the Chat Console. Explain that the contract is broken into 500-character chunks, vectorized using Gemini embeddings (or TF-IDF overlap), searched using cosine similarity, and the most relevant chunks are sent as context to Gemini.
-3.  **Graph Database Fallback:** Explain that Neo4j is utilized to store relationship nodes (`(:Contract)-[:CONTAINS]->(:Clause)`) and cross-references (`(:Clause)-[:REFERENCES]->(:Clause)`). If Neo4j is offline, the app builds this structure in-memory using an object graph map and renders it as an SVG.
+1. **Offline Resiliency:** With no `GEMINI_API_KEY`, the `FallbackProvider` activates the offline heuristic engine — clause extraction, risk scores, summaries, and chat all still work. The app **never crashes** without internet.
+2. **RAG Explanation:** Contract text is split into ~800-character overlapping chunks, embedded with `text-embedding-004` **once at upload** and cached; each question only embeds the query and ranks chunks by cosine similarity. Offline, a TF-IDF keyword vectorizer is used instead. The **Context Source** drawer shows the exact chunks fed to the model.
+3. **Clean Architecture:** Walk through the `LLMProvider` abstraction (`services/llm/`) and the rule registries (`services/rules/`) to show Dependency Inversion and Open/Closed in action — and the Jest suite that guards them.
+4. **Graph Database Fallback:** Neo4j stores `(:Contract)-[:CONTAINS]->(:Clause)` and `(:Clause)-[:REFERENCES]->(:Clause)`. If offline, the same structure is built in memory and rendered as an interactive SVG.
+</content>

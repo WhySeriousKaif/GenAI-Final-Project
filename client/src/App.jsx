@@ -6,7 +6,6 @@
 // persistent Navbar component and checking matching routes to display
 // pages dynamically.
 
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -31,9 +30,9 @@ function ProtectedRoute({ children, requireAdmin = false }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-xs text-muted bg-canvas">
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center text-sm text-muted bg-canvas">
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
           <span>Authenticating LexiCore session...</span>
         </div>
       </div>
@@ -115,7 +114,7 @@ function App() {
           </main>
 
           {/* Persistent Footer */}
-          <footer className="w-full border-t border-hairline py-4 text-center text-[10px] text-muted font-medium tracking-wide">
+          <footer className="w-full border-t border-hairline py-4.5 text-center text-xs text-muted font-medium tracking-wide">
             © {new Date().getFullYear()} LexiCore AI. All rights reserved. Submitted for Academic Review.
           </footer>
 

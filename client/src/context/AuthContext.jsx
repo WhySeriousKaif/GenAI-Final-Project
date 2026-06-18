@@ -1,8 +1,9 @@
 // =========================================================================
 // React Authentication Context & Provider
 // =========================================================================
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { loginUser, registerUser, getMe } from '../services/api';
+import { createContext, useState, useEffect, useContext } from 'react';
+import { loginUser, registerUser, getMe, getApiErrorMessage } from '../services/api';
+import { TOKEN_KEY } from '../config/constants';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   // Check if user is logged in on mount
   useEffect(() => {
     const checkUserAuth = async () => {
-      const token = localStorage.getItem('lexicore_token');
+      const token = localStorage.getItem(TOKEN_KEY);
       if (!token) {
         setLoading(false);
         return;
@@ -25,11 +26,11 @@ export const AuthProvider = ({ children }) => {
           setUser(data.user);
         } else {
           // Token expired or invalid
-          localStorage.removeItem('lexicore_token');
+          localStorage.removeItem(TOKEN_KEY);
         }
       } catch (err) {
         console.error('Session validation failed:', err);
-        localStorage.removeItem('lexicore_token');
+        localStorage.removeItem(TOKEN_KEY);
       } finally {
         setLoading(false);
       }
@@ -43,17 +44,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await loginUser(username, password);
       if (data.success) {
-        localStorage.setItem('lexicore_token', data.token);
+        localStorage.setItem(TOKEN_KEY, data.token);
         setUser(data.user);
         return { success: true };
       }
       return { success: false, message: data.message || 'Login failed' };
     } catch (err) {
       console.error(err);
-      return { 
-        success: false, 
-        message: err.response?.data?.message || 'Invalid username or password' 
-      };
+      return { success: false, message: getApiErrorMessage(err, 'Invalid username or password') };
     }
   };
 
@@ -62,23 +60,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await registerUser(username, email, password, role);
       if (data.success) {
-        localStorage.setItem('lexicore_token', data.token);
+        localStorage.setItem(TOKEN_KEY, data.token);
         setUser(data.user);
         return { success: true };
       }
       return { success: false, message: data.message || 'Registration failed' };
     } catch (err) {
       console.error(err);
-      return { 
-        success: false, 
-        message: err.response?.data?.message || 'Registration failed' 
-      };
+      return { success: false, message: getApiErrorMessage(err, 'Registration failed') };
     }
   };
 
   // Logout action
   const logout = () => {
-    localStorage.removeItem('lexicore_token');
+    localStorage.removeItem(TOKEN_KEY);
     setUser(null);
   };
 
@@ -89,6 +84,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

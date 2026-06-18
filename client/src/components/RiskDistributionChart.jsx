@@ -1,7 +1,11 @@
 // =========================================================================
 // Risk Distribution Donut Chart (Recharts)
 // =========================================================================
-import React from 'react';
+// This component aggregates clause risks and draws a beautiful, interactive 
+// donut pie chart showing the density of risks by category.
+// Categories: Financial, Operational, Legal, Reputational.
+
+
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 
@@ -29,6 +33,7 @@ const RiskDistributionChart = ({ contracts }) => {
     value: counts[key]
   })).filter(item => item.value > 0);
 
+  // Fallback if no data is available
   if (data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-muted text-xs">
@@ -44,10 +49,10 @@ const RiskDistributionChart = ({ contracts }) => {
     Legal: '#ff9a2e',        // Neon Orange
     Reputational: '#9a8df2'  // Soft Purple
   } : {
-    Financial: '#cc785c',    // coral (primary)
-    Operational: '#d4a017',  // warm amber
-    Legal: '#5db872',        // sage green
-    Reputational: '#8b7355'  // warm brown
+    Financial: '#2563eb',    // Vibrant Blue
+    Operational: '#16a34a',  // High-Contrast Green
+    Legal: '#ea580c',        // High-Contrast Orange
+    Reputational: '#7c3aed'  // High-Contrast Purple
   };
 
   return (
@@ -69,8 +74,8 @@ const RiskDistributionChart = ({ contracts }) => {
           </Pie>
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: isDark ? '#111216' : '#faf9f5', 
-              borderColor: isDark ? '#1d1f24' : '#e6dfd8', 
+              backgroundColor: isDark ? '#111216' : '#faf9f5',
+              borderColor: isDark ? '#1d1f24' : '#e6dfd8',
               borderRadius: '8px',
               color: isDark ? '#ffffff' : '#141413',
               fontSize: '11px'

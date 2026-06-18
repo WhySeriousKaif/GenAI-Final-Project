@@ -18,7 +18,7 @@
 // Usage:
 //   <ExportReportButton contract={contract} />
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Download, Check } from 'lucide-react';
 
 /**

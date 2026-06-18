@@ -3,6 +3,7 @@
    ========================================================================= */
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;650&display=swap');
+@variant dark (&:where(.dark, .dark *));
 
 /* =========================================================================
    LIGHT MODE — Warm Cream Canvas Tokens
@@ -16,8 +17,8 @@
   --color-surface-dark-elevated:#252320;
   --color-surface-dark-soft:    #1f1e1b;
 
-  --color-primary:              #cc785c;
-  --color-primary-active:       #a9583e;
+  --color-primary:              #2563eb;
+  --color-primary-active:       #1d4ed8;
   --color-primary-disabled:     #e6dfd8;
 
   --color-ink:                  #141413;
@@ -32,9 +33,9 @@
   --color-warning:              #d4a017;
   --color-error:                #c64545;
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:  'JetBrains Mono', monospace;
+  --font-serif: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* =========================================================================
@@ -104,7 +105,7 @@ html.dark {
     background-color: var(--color-canvas);
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    @apply w-full rounded-lg px-3 py-2 text-xs placeholder-muted focus:outline-none transition-all duration-200;
+    @apply w-full rounded-lg px-4 py-3 text-sm placeholder-muted focus:outline-none transition-all duration-200;
   }
   .glass-input:focus {
     border-color: var(--color-primary);
@@ -116,7 +117,7 @@ html.dark {
 
   .btn-primary {
     background-color: var(--color-primary);
-    @apply text-white font-semibold px-4 py-2 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm cursor-pointer;
   }
   .btn-primary:hover {
     background-color: var(--color-primary-active);
@@ -126,18 +127,18 @@ html.dark {
     background-color: var(--color-canvas);
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    @apply font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply font-semibold px-5 py-2.5 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm cursor-pointer;
   }
   .btn-secondary:hover {
     background-color: var(--color-surface-soft);
   }
 
   .btn-secondary-dark {
-    @apply bg-surface-dark-elevated hover:bg-surface-dark-soft text-white border border-surface-dark-soft font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-surface-dark-elevated hover:bg-surface-dark-soft text-white border border-surface-dark-soft font-semibold px-5 py-2.5 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm cursor-pointer;
   }
 
   .btn-danger {
-    @apply bg-error hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-error hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm cursor-pointer;
   }
 
   /* Theme-aware toggle button */
@@ -186,7 +187,7 @@ html.dark {
 @layer components {
   /* Individual contributor avatar badge */
   .contributor-badge {
-    @apply inline-flex items-center justify-center rounded-full text-white font-bold text-xs bg-gradient-to-br from-blue-600 to-blue-500 shadow-md border border-blue-400/20 transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full text-white font-bold text-sm bg-gradient-to-br from-blue-600 to-blue-500 shadow-md border border-blue-400/20 transition-all duration-200;
   }
 
   .contributor-badge:hover {
@@ -224,7 +225,7 @@ html.dark {
     background-color: var(--color-surface-soft);
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium;
   }
 
   /* Vertical timeline for analysis steps */
@@ -257,12 +258,12 @@ html.dark {
 
   .timeline-content-label {
     color: var(--color-ink);
-    @apply text-xs font-semibold;
+    @apply text-sm font-semibold;
   }
 
   .timeline-content-time {
     color: var(--color-muted);
-    @apply text-[10px] mt-0.5;
+    @apply text-xs mt-0.5;
   }
 
   /* Color coding by department/role */

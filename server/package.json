@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "generate-docs": "node utils/generateSampleDocs.js",
+    "test": "jest"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -20,5 +22,9 @@
     "neo4j-driver": "^5.19.0",
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.19.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }

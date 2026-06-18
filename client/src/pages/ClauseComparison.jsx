@@ -1,24 +1,31 @@
 // =========================================================================
 // Clause Comparison Page Component
 // =========================================================================
-import React, { useEffect, useState } from 'react';
+// This page implements the batch contract comparison feature.
+// It allows users to:
+// 1. Select multiple ingested contracts from a checklist.
+// 2. Select specific clause types they want to compare.
+// 3. Render a beautiful grid table showing the side-by-side comparisons, 
+//    including verbatim texts, section numbers, and risk ratings.
+
+import { useEffect, useState } from 'react';
 import { getContracts, getContractById } from '../services/api';
 import { RiskScoreBadge } from '../components/RiskBadge';
 import CopyButton from '../components/CopyButton';
-import { Layers, FileText, Check, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Layers, Check, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ClauseComparison = () => {
   const [contractsList, setContractsList] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
+  
+  // Selection states
   const [selectedContractIds, setSelectedContractIds] = useState([]);
   const [comparedContracts, setComparedContracts] = useState([]);
   const [loadingComparison, setLoadingComparison] = useState(false);
 
   const clauseTypes = ['Payment Terms', 'Termination', 'Limitation of Liability', 'Indemnity', 'IP Ownership', 'Governing Law', 'Confidentiality'];
   const [selectedClauses, setSelectedClauses] = useState(['Payment Terms', 'Termination', 'Limitation of Liability']);
-
-  useEffect(() => { fetchContractsList(); }, []);
 
   const fetchContractsList = async () => {
     try {
@@ -29,7 +36,19 @@ const ClauseComparison = () => {
     finally { setLoadingList(false); }
   };
 
-  const handleToggleContract = (id) => setSelectedContractIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchContractsList();
+  }, []);
+
+  // Toggle contract selection
+  const handleToggleContract = (id) => {
+    setSelectedContractIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
+    );
+  };
   const handleToggleClause = (type) => setSelectedClauses(prev => prev.includes(type) ? prev.filter(i => i !== type) : [...prev, type]);
 
   const handleCompareSubmit = async () => {
@@ -45,14 +64,14 @@ const ClauseComparison = () => {
   const getClauseForContract = (contract, clauseType) => contract.extractedClauses?.find(c => c.clauseType === clauseType);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-canvas text-body font-sans">
+    <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-canvas text-body font-sans">
       
       {/* Title */}
       <div>
-        <h1 className="text-3xl font-serif tracking-tight text-ink flex items-center gap-3 font-medium">
+        <h1 className="text-4xl font-serif tracking-tight text-ink flex items-center gap-3 font-medium">
           <Layers className="h-8 w-8 text-primary" /> Batch Clause Comparison
         </h1>
-        <p className="mt-2 text-sm text-muted">Select multiple contracts and compare terms side-by-side to discover deviations and variance.</p>
+        <p className="mt-2 text-base text-muted">Select multiple contracts and compare terms side-by-side to discover deviations and variance.</p>
       </div>
 
       {/* Control Panel */}
@@ -60,11 +79,11 @@ const ClauseComparison = () => {
         
         {/* Step 1: Select Contracts */}
         <div className="md:col-span-2 glass-card p-6 space-y-4">
-          <h3 className="text-xs font-semibold text-ink uppercase tracking-wider">Step 1: Select Contracts to Compare</h3>
+          <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">Step 1: Select Contracts to Compare</h3>
           {loadingList ? (
-            <div className="text-xs text-muted">Loading registry...</div>
+            <div className="text-sm text-muted">Loading registry...</div>
           ) : contractsList.length === 0 ? (
-            <div className="text-xs text-muted flex items-center gap-2 p-4 border border-hairline rounded-xl bg-canvas">
+            <div className="text-sm text-muted flex items-center gap-2 p-4 border border-hairline rounded-xl bg-canvas">
               <AlertCircle className="h-5 w-5 text-primary" />
               <span>No contracts available. <Link to="/upload" className="text-primary hover:underline">Upload some first.</Link></span>
             </div>
@@ -79,8 +98,8 @@ const ClauseComparison = () => {
                       {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
                     </div>
                     <div className="truncate flex-1">
-                      <p className="text-xs font-semibold truncate text-ink">{contract.title}</p>
-                      <p className="text-[10px] text-muted mt-0.5">Risk Rating: {contract.overallRiskScore}%</p>
+                      <p className="text-sm font-semibold truncate text-ink">{contract.title}</p>
+                      <p className="text-xs text-muted mt-0.5">Risk Rating: {contract.overallRiskScore}%</p>
                     </div>
                   </button>
                 );
@@ -91,13 +110,13 @@ const ClauseComparison = () => {
 
         {/* Step 2: Select Clauses */}
         <div className="glass-card p-6 space-y-4">
-          <h3 className="text-xs font-semibold text-ink uppercase tracking-wider">Step 2: Select Clause Categories</h3>
+          <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">Step 2: Select Clause Categories</h3>
           <div className="flex flex-wrap gap-2">
             {clauseTypes.map(type => {
               const isChecked = selectedClauses.includes(type);
               return (
                 <button key={type} onClick={() => handleToggleClause(type)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${isChecked ? 'bg-primary/10 border-primary text-primary' : 'bg-canvas border-hairline text-muted hover:border-primary/40 hover:text-ink'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${isChecked ? 'bg-primary/10 border-primary text-primary' : 'bg-canvas border-hairline text-muted hover:border-primary/40 hover:text-ink'}`}>
                   {type}
                 </button>
               );
@@ -117,26 +136,26 @@ const ClauseComparison = () => {
       {/* Step 3: Comparison Grid Table */}
       {comparedContracts.length > 0 && !loadingComparison && (
         <div className="glass-card p-6 overflow-hidden">
-          <h3 className="text-sm font-serif text-ink font-medium mb-6">
+          <h3 className="text-base font-serif text-ink font-medium mb-6">
             Comparison Matrix ({comparedContracts.length} Contracts)
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
               <thead>
-                <tr className="border-b border-hairline text-xs font-semibold text-muted uppercase tracking-wider">
+                <tr className="border-b border-hairline text-sm font-semibold text-muted uppercase tracking-wider">
                   <th className="pb-4 w-1/4">Clause Category</th>
                   {comparedContracts.map(contract => (
                     <th key={contract._id} className="pb-4 px-4 truncate">
-                      <p className="text-ink font-semibold text-xs truncate">{contract.title}</p>
-                      <span className="text-[10px] text-muted font-semibold uppercase">Overall Risk: {contract.overallRiskScore}%</span>
+                      <p className="text-ink font-semibold text-sm truncate">{contract.title}</p>
+                      <span className="text-xs text-muted font-semibold uppercase">Overall Risk: {contract.overallRiskScore}%</span>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-hairline text-xs leading-normal">
+              <tbody className="divide-y divide-hairline text-sm leading-normal">
                 {selectedClauses.map(clauseType => (
                   <tr key={clauseType} className="hover:bg-surface-cream-strong/30 transition-colors">
-                    <td className="py-5 pr-4 font-semibold text-ink text-xs align-top">{clauseType}</td>
+                    <td className="py-5 pr-4 font-semibold text-ink text-sm align-top">{clauseType}</td>
                     {comparedContracts.map(contract => {
                       const clause = getClauseForContract(contract, clauseType);
                       if (!clause) return (
@@ -145,7 +164,7 @@ const ClauseComparison = () => {
                       return (
                         <td key={contract._id} className="py-5 px-4 space-y-2.5 align-top border-l border-hairline">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] text-muted font-semibold">{clause.sectionNumber}</span>
+                            <span className="text-xs text-muted font-semibold">{clause.sectionNumber}</span>
                             <RiskScoreBadge score={clause.riskScore} />
                           </div>
                           <div className="relative group">
@@ -155,8 +174,8 @@ const ClauseComparison = () => {
                             </p>
                           </div>
                           <div className="bg-canvas border border-hairline p-2 rounded-lg space-y-1">
-                            <span className="text-[9px] text-primary font-bold uppercase tracking-wider block">Assessment</span>
-                            <p className="text-[10px] text-muted leading-normal">{clause.reason}</p>
+                            <span className="text-[11px] text-primary font-bold uppercase tracking-wider block">Assessment</span>
+                            <p className="text-xs text-muted leading-normal">{clause.reason}</p>
                           </div>
                         </td>
                       );
