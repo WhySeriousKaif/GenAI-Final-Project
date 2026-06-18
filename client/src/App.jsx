@@ -8,6 +8,7 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Navbar
 import Navbar from './components/Navbar';
@@ -29,9 +30,9 @@ function ProtectedRoute({ children, requireAdmin = false }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-xs text-slate-400 bg-navy-950">
+      <div className="min-h-screen flex items-center justify-center text-xs text-muted bg-canvas">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
           <span>Authenticating LexiCore session...</span>
         </div>
       </div>
@@ -51,9 +52,10 @@ function ProtectedRoute({ children, requireAdmin = false }) {
 
 function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
       <Router>
-        <div className="min-h-screen flex flex-col bg-navy-950">
+        <div className="min-h-screen flex flex-col bg-canvas">
           
           {/* Persistent Header Navigation Bar */}
           <Navbar />
@@ -112,13 +114,14 @@ function App() {
           </main>
 
           {/* Persistent Footer */}
-          <footer className="w-full bg-navy-950/40 border-t border-navy-850 py-4 text-center text-[10px] text-slate-500 font-medium tracking-wide">
+          <footer className="w-full border-t border-hairline py-4 text-center text-[10px] text-muted font-medium tracking-wide">
             © {new Date().getFullYear()} LexiCore AI. All rights reserved. Submitted for Academic Review.
           </footer>
 
         </div>
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

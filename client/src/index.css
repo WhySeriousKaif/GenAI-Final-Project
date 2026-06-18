@@ -1,108 +1,293 @@
 /* =========================================================================
-   Global Tailwind CSS Imports & Professional Typography System (Tailwind v4)
+   Claude Warm-Editorial Design System & Foundation (Tailwind v4)
    ========================================================================= */
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;650&display=swap');
 
-/* Tailwind v4 Custom Theme Extension */
+/* =========================================================================
+   LIGHT MODE — Warm Cream Canvas Tokens
+   ========================================================================= */
 @theme {
-  --color-navy-50: #f0f3f6;
-  --color-navy-100: #d1d6e2;
-  --color-navy-200: #a3adc4;
-  --color-navy-300: #7583a6;
-  --color-navy-400: #4c5a88;
-  --color-navy-500: #303d6e;
-  --color-navy-600: #212c58;
-  --color-navy-700: #1b2347;
-  --color-navy-800: #161b36;
-  --color-navy-850: #12152b;
-  --color-navy-900: #111422; /* Sleek Card Background */
-  --color-navy-950: #080a11; /* Main Canvas Midnight */
-  
-  --color-accent-500: #2563eb; /* Royal Blue Accent */
-  --color-accent-600: #1d4ed8;
-  --color-gold-500: #eab308;   /* Gold Accent */
-  --color-gold-600: #ca8a04;
+  --color-canvas:               #faf9f5;
+  --color-surface-soft:         #f5f0e8;
+  --color-surface-card:         #efe9de;
+  --color-surface-cream-strong: #e8e0d2;
+  --color-surface-dark:         #181715;
+  --color-surface-dark-elevated:#252320;
+  --color-surface-dark-soft:    #1f1e1b;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-primary:              #cc785c;
+  --color-primary-active:       #a9583e;
+  --color-primary-disabled:     #e6dfd8;
+
+  --color-ink:                  #141413;
+  --color-body-strong:          #252523;
+  --color-body:                 #3d3d3a;
+  --color-muted:                #6c6a64;
+  --color-muted-soft:           #8e8b82;
+  --color-hairline:             #e6dfd8;
+  --color-hairline-soft:        #ebe6df;
+
+  --color-success:              #5db872;
+  --color-warning:              #d4a017;
+  --color-error:                #c64545;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+
+/* =========================================================================
+   DARK MODE — Overrides via html.dark CSS custom properties
+   ========================================================================= */
+html.dark {
+  --color-canvas:               #07080a; /* Sleek Pitch Slate Black */
+  --color-surface-soft:         #111216; /* Clean Charcoal Cards */
+  --color-surface-card:         #111216;
+  --color-surface-cream-strong: #1b1c22; /* Active/Hover Card background */
+
+  --color-primary:              #3b82f6; /* Vibrant Blue Accent */
+  --color-primary-active:       #2563eb;
+  --color-primary-disabled:     #1d1f24;
+
+  --color-ink:                  #ffffff; /* Strong white text */
+  --color-body-strong:          #e4e5e9;
+  --color-body:                 #babbc2; /* Clear secondary text */
+  --color-muted:                #80838d; /* Muted slate gray text */
+  --color-muted-soft:           #4c4f59;
+  --color-hairline:             #1d1f24; /* Clean borders outlining cards */
+  --color-hairline-soft:        #15161a;
+
+  --color-success:              #10b981; /* Emerald Green */
+  --color-warning:              #ff9a2e; /* Neon Orange Accent */
+  --color-error:                #fa5252;
 }
 
 @layer base {
-  body {
-    @apply bg-navy-950 text-slate-100 antialiased selection:bg-accent-500/30 selection:text-white font-sans;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.12) 0px, transparent 40%),
-      radial-gradient(at 100% 100%, rgba(234, 179, 8, 0.04) 0px, transparent 40%);
-    background-attachment: fixed;
+  html {
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  body {
+    @apply bg-canvas text-body antialiased font-sans;
+    selection-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink tracking-tight font-medium;
   }
 }
 
 /* =========================================================================
-   Premium Custom UI Utility Classes (Modern Portal Aesthetics)
+   Premium Custom UI Components — auto-adapt to dark/light via CSS vars
    ========================================================================= */
 @layer components {
-  /* Crisp, solid cards matching the Scaler Student Portal cards */
+
   .glass-card {
-    @apply bg-navy-900 border border-[#1f243d] rounded-xl shadow-lg transition-all duration-300;
+    background-color: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    @apply rounded-xl shadow-sm transition-all duration-300;
   }
-  
+
   .glass-card-hover {
-    @apply hover:bg-[#15192b] hover:border-[#2b3254] hover:shadow-xl hover:-translate-y-0.5;
+    @apply hover:shadow-md hover:-translate-y-0.5;
+  }
+  .glass-card-hover:hover {
+    background-color: var(--color-surface-cream-strong);
   }
 
-  /* Sleek modern inputs */
+  .dark-card {
+    @apply bg-surface-dark border border-surface-dark-elevated text-white rounded-xl shadow-md p-6;
+  }
+
   .glass-input {
-    @apply w-full bg-navy-950 border border-[#1f243d] rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50 transition-all duration-200;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    @apply w-full rounded-lg px-3 py-2 text-xs placeholder-muted focus:outline-none transition-all duration-200;
+  }
+  .glass-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+  }
+  .glass-input::placeholder {
+    color: var(--color-muted);
   }
 
-  /* Premium Royal Blue Buttons - Tighter and smaller */
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold px-4 py-2 rounded-lg shadow-md shadow-blue-950/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    background-color: var(--color-primary);
+    @apply text-white font-semibold px-4 py-2 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-primary-active);
   }
 
-  /* Secondary outline/navy button style - Tighter and smaller */
   .btn-secondary {
-    @apply bg-[#161a2e] hover:bg-[#1e233d] text-slate-200 border border-[#1f243d] font-bold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    @apply font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-surface-soft);
   }
 
-  /* Danger Red Button - Tighter and smaller */
+  .btn-secondary-dark {
+    @apply bg-surface-dark-elevated hover:bg-surface-dark-soft text-white border border-surface-dark-soft font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+  }
+
   .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold px-4 py-2 rounded-lg shadow-md shadow-red-950/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+    @apply bg-error hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 text-xs cursor-pointer;
+  }
+
+  /* Theme-aware toggle button */
+  .btn-theme-toggle {
+    background-color: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-muted);
+    @apply p-2 rounded-lg transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95;
+  }
+  .btn-theme-toggle:hover {
+    color: var(--color-ink);
+    background-color: var(--color-surface-card);
   }
 }
 
 /* =========================================================================
-   Custom Animations & Interactive Effects
+   Scrollbar — adapts to theme
    ========================================================================= */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(1.03);
-  }
-}
-
-.animate-glow {
-  animation: pulse-glow 6s infinite ease-in-out;
-}
-
-/* Modern Minimalist Scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
 
 ::-webkit-scrollbar-track {
-  @apply bg-navy-950;
+  background: var(--color-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-[#1f243d] rounded-full hover:bg-[#2b3254] transition-colors;
+  background: var(--color-hairline);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-cream-strong);
+}
+
+/* =========================================================================
+   Utility: smooth theme transition on all elements
+   ========================================================================= */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* =========================================================================
+   Contributor & Team Attribution Styling
+   ========================================================================= */
+@layer components {
+  /* Individual contributor avatar badge */
+  .contributor-badge {
+    @apply inline-flex items-center justify-center rounded-full text-white font-bold text-xs bg-gradient-to-br from-blue-600 to-blue-500 shadow-md border border-blue-400/20 transition-all duration-200;
+  }
+
+  .contributor-badge:hover {
+    @apply scale-110 shadow-lg;
+  }
+
+  /* Stacked overlapping avatars */
+  .contributor-stack {
+    @apply flex items-center -space-x-2;
+  }
+
+  .contributor-stack .contributor-badge {
+    border-width: 2px;
+    border-color: var(--color-canvas);
+  }
+
+  .contributor-stack .contributor-badge:hover {
+    @apply z-50;
+  }
+
+  /* Contribution stats bar */
+  .contribution-bar {
+    background-color: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    @apply w-full h-2 rounded-full overflow-hidden;
+  }
+
+  .contribution-fill {
+    background-image: linear-gradient(to right, var(--color-primary), var(--color-primary-active));
+    @apply h-full transition-all duration-500;
+  }
+
+  /* Analyst attribution stamp */
+  .analyst-stamp {
+    background-color: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium;
+  }
+
+  /* Vertical timeline for analysis steps */
+  .analysis-timeline {
+    @apply space-y-4 relative;
+  }
+
+  .timeline-step {
+    @apply flex gap-3 relative pl-10;
+  }
+
+  .timeline-step::before {
+    content: '';
+    background-image: linear-gradient(to bottom, var(--color-primary), var(--color-primary-active));
+    opacity: 0.2;
+    @apply absolute left-3.5 top-8 bottom-0 w-0.5;
+  }
+
+  .timeline-step:last-child::before {
+    @apply hidden;
+  }
+
+  .timeline-avatar {
+    @apply absolute left-0 top-0 w-8 h-8 rounded-full shadow-md border border-white/20 flex items-center justify-center text-white text-xs font-bold;
+  }
+
+  .timeline-content {
+    @apply pt-1;
+  }
+
+  .timeline-content-label {
+    color: var(--color-ink);
+    @apply text-xs font-semibold;
+  }
+
+  .timeline-content-time {
+    color: var(--color-muted);
+    @apply text-[10px] mt-0.5;
+  }
+
+  /* Color coding by department/role */
+  .analyst-legal {
+    @apply bg-gradient-to-br from-sky-600 to-sky-500;
+  }
+
+  .analyst-finance {
+    @apply bg-gradient-to-br from-emerald-600 to-emerald-500;
+  }
+
+  .analyst-operations {
+    @apply bg-gradient-to-br from-amber-600 to-amber-500;
+  }
+
+  /* Contribution percentage indicator */
+  .contribution-stat {
+    @apply flex flex-col items-center gap-1;
+  }
+
+  .contribution-stat-value {
+    @apply text-sm font-bold text-white;
+  }
+
+  .contribution-stat-label {
+    @apply text-[10px] text-slate-400;
+  }
 }

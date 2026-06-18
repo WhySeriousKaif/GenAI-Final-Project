@@ -108,11 +108,11 @@ const UploadContract = () => {
         
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-100 flex items-center justify-center gap-2">
-            <UploadCloud className="h-7 w-7 text-blue-500" />
+          <h1 className="text-3xl font-serif text-ink flex items-center justify-center gap-2 font-medium">
+            <UploadCloud className="h-8 w-8 text-primary" />
             Document Ingestion Portal
           </h1>
-          <p className="text-sm text-slate-400 mt-2">
+          <p className="text-xs text-muted mt-2">
             Upload commercial agreements or contracts for risk scanning.
           </p>
         </div>
@@ -126,8 +126,8 @@ const UploadContract = () => {
             onDrop={handleDrop}
             className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-4 transition-all ${
               dragActive 
-                ? 'border-blue-500 bg-blue-500/5' 
-                : 'border-navy-700 bg-navy-900/20 hover:border-navy-600 hover:bg-navy-900/40'
+                ? 'border-primary bg-primary/5' 
+                : 'border-hairline bg-canvas hover:border-primary hover:bg-surface-soft'
             }`}
           >
             <input
@@ -138,50 +138,50 @@ const UploadContract = () => {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             
-            <div className="p-4 bg-navy-800 rounded-full border border-navy-750 text-slate-400">
-              <UploadCloud className="h-10 w-10 text-blue-500" />
+            <div className="p-4 bg-surface-card rounded-full border border-hairline text-primary">
+              <UploadCloud className="h-10 w-10" />
             </div>
  
             <div className="text-center">
-              <p className="text-sm font-semibold text-slate-200">
-                Drag and drop your file here, or <span className="text-blue-500 hover:underline">browse</span>
+              <p className="text-xs font-semibold text-ink">
+                Drag and drop your file here, or <span className="text-primary hover:underline">browse</span>
               </p>
-              <p className="text-xs text-slate-500 mt-1">Supports PDF and DOCX agreements (Max 10MB)</p>
+              <p className="text-[10px] text-muted mt-1">Supports PDF and DOCX agreements (Max 10MB)</p>
             </div>
           </div>
         )}
 
         {/* Loading / Processing State */}
         {uploading && (
-          <div className="flex flex-col items-center justify-center p-10 space-y-6 bg-navy-900/40 border border-navy-800 rounded-2xl">
+          <div className="flex flex-col items-center justify-center p-10 space-y-6 bg-surface-card border border-hairline rounded-2xl">
             <div className="relative flex items-center justify-center">
-              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <ShieldAlert className="h-6 w-6 text-blue-500 absolute animate-pulse" />
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <ShieldAlert className="h-6 w-6 text-primary absolute animate-pulse" />
             </div>
             
             <div className="text-center space-y-2">
-              <h4 className="text-md font-bold text-slate-200">Document Ingestion Pipeline Running</h4>
-              <p className="text-xs text-blue-500 font-semibold uppercase tracking-wider">{pipelineStep}</p>
-              <p className="text-[10px] text-slate-500 italic">This usually takes 3-10 seconds depending on document length.</p>
+              <h4 className="text-sm font-semibold text-ink">Document Ingestion Pipeline Running</h4>
+              <p className="text-xs text-primary font-semibold uppercase tracking-wider">{pipelineStep}</p>
+              <p className="text-[10px] text-muted italic">This usually takes 3-10 seconds depending on document length.</p>
             </div>
           </div>
         )}
 
         {/* Selected File Card */}
         {file && !uploading && (
-          <div className="bg-navy-900/50 border border-navy-850 p-4 rounded-xl flex items-center justify-between">
+          <div className="bg-canvas border border-hairline p-4 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-lg">
+              <div className="p-2.5 bg-primary/10 text-primary rounded-lg">
                 <File className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-200 truncate max-w-md">{file.name}</p>
-                <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p className="text-xs font-semibold text-ink truncate max-w-md">{file.name}</p>
+                <p className="text-[10px] text-muted">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
               </div>
             </div>
             <button
               onClick={handleUploadSubmit}
-              className="btn-primary py-2 px-5 text-sm"
+              className="btn-primary py-2 px-5"
             >
               Analyze
             </button>
@@ -190,15 +190,14 @@ const UploadContract = () => {
 
         {/* Error Callout */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-error mt-0.5 flex-shrink-0" />
             <div>
-              <h5 className="text-sm font-bold text-red-400">Ingestion Error</h5>
-              <p className="text-xs text-slate-400 mt-1">{error}</p>
+              <h5 className="text-xs font-semibold text-error">Ingestion Error</h5>
+              <p className="text-[10px] text-muted mt-1">{error}</p>
             </div>
           </div>
         )}
-
 
       </div>
     </div>

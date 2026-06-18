@@ -1,10 +1,6 @@
 // =========================================================================
 // Risk Badge & Market Status Renderer Component
 // =========================================================================
-// This reusable helper displays formatted, color-coded badges indicating:
-// 1. Risk Severity Levels (Low, Medium, High scores)
-// 2. Market Alignment Statuses (Favourable, Unfavourable, Unusual)
-// 
 // Color associations:
 // - Green/Safe: Favourable terms (0-30 risk score)
 // - Yellow/Caution: Unusual/Medium terms (31-70 risk score)
@@ -14,20 +10,19 @@
 
 /**
  * Renders a pill badge showing the numeric score and a descriptor (Low/Medium/High).
- * 
  * @param {number} score - Risk score from 0 to 100
  */
 export const RiskScoreBadge = ({ score }) => {
   const numScore = Number(score);
   let label = 'Low';
-  let colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  let colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
   if (numScore > 70) {
     label = 'High Risk';
-    colorClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+    colorClass = 'bg-red-50 text-error border-red-200';
   } else if (numScore > 30) {
     label = 'Medium Risk';
-    colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    colorClass = 'bg-amber-50 text-warning border-amber-200';
   }
 
   return (
@@ -40,21 +35,20 @@ export const RiskScoreBadge = ({ score }) => {
 
 /**
  * Renders a pill badge describing the market standard alignment.
- * 
  * @param {string} status - Favourable, Unfavourable, or Unusual
  */
 export const MarketStatusBadge = ({ status }) => {
-  let colorClass = 'bg-slate-700/50 text-slate-300 border-slate-600/50';
+  let colorClass = 'bg-surface-card text-body border-hairline';
 
   switch (status) {
     case 'Favourable':
-      colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
       break;
     case 'Unfavourable':
-      colorClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      colorClass = 'bg-red-50 text-error border-red-200';
       break;
     case 'Unusual':
-      colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      colorClass = 'bg-amber-50 text-warning border-amber-200';
       break;
   }
 
