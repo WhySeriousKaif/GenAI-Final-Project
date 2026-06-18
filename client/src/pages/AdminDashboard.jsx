@@ -129,14 +129,14 @@ const AdminDashboard = () => {
       </div>
 
       {/* Danger Zone */}
-      <div className="glass-card p-5 space-y-4 border border-red-200 bg-red-50/30">
+      <div className="glass-card p-5 space-y-4 border border-red-200/60 bg-red-50/10 dark:border-red-900/40 dark:bg-red-950/10">
         <div>
           <h3 className="text-base font-semibold text-ink flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-error animate-pulse" /> Danger Zone
           </h3>
           <p className="text-xs text-muted mt-0.5">Actions in this panel are destructive and will clear the system.</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-red-50 p-3 rounded-lg border border-red-200">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-red-50/40 p-3 rounded-lg border border-red-200/60 dark:bg-red-950/20 dark:border-red-900/40">
           <div className="space-y-0.5 text-center sm:text-left">
             <h4 className="text-sm font-semibold text-ink">Full System Reset</h4>
             <p className="text-xs text-muted leading-normal max-w-md">Deletes all records from MongoDB and empties the Neo4j graph nodes. Useful before beginning a live project viva presentation.</p>
