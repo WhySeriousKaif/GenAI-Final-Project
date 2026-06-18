@@ -5,11 +5,12 @@
 // It features a premium, semi-translucent glass effect with responsive links
 // and clear active-route styling using React Router.
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShieldAlert, LayoutDashboard, UploadCloud, FileText, Settings, MessageSquare, LogOut, User as UserIcon, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getTopContributors } from '../data/contributorsMock';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -102,6 +103,24 @@ const Navbar = () => {
                   );
                 })}
               </nav>
+            )}
+
+            {/* Contributor Avatar Stack */}
+            {user && (
+              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-navy-800/80">
+                <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Team:</span>
+                <div className="contributor-stack group">
+                  {getTopContributors().map((contributor) => (
+                    <div
+                      key={contributor.id}
+                      className={`contributor-badge w-7 h-7 bg-gradient-to-br ${contributor.avatarColor}`}
+                      title={contributor.name}
+                    >
+                      {contributor.initials}
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             {user ? (

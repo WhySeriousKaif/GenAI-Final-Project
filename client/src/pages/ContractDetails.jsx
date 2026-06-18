@@ -6,6 +6,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getContractById } from '../services/api';
 import GraphVisualizer from '../components/GraphVisualizer';
 import { RiskScoreBadge, MarketStatusBadge } from '../components/RiskBadge';
+import { getSampleAnalysisHistory, contributors } from '../data/contributorsMock';
 import CopyButton from '../components/CopyButton';
 import ExportReportButton from '../components/ExportReportButton';
 import { 
@@ -19,7 +20,8 @@ import {
   Layers, 
   ChevronRight,
   TrendingUp,
-  Scale
+  Scale,
+  CheckCircle2
 } from 'lucide-react';
 
 const ContractDetails = () => {
@@ -124,6 +126,10 @@ const ContractDetails = () => {
             <div className="space-y-3">
               {clauses.map((clause, idx) => {
                 const isHighlighted = highlightedClauseType === clause.clauseType;
+                // Assign consistent analyst based on clause index
+                const analystIndex = idx % contributors.length;
+                const assignedAnalyst = contributors[analystIndex];
+                
                 return (
                   <div key={clause._id || idx} ref={el => clauseRefs.current[clause.clauseType] = el}
                     className={`glass-card p-4 space-y-3 transition-all duration-300 ${isHighlighted ? 'border-primary/60 bg-primary/5 shadow-md scale-[1.01]' : ''}`}>
@@ -151,6 +157,17 @@ const ContractDetails = () => {
                       <div className="bg-canvas border border-hairline rounded-lg p-3 space-y-0.5">
                         <span className="text-[9px] font-bold text-muted uppercase tracking-wider block">Market Comparison</span>
                         <p className="text-body leading-normal text-[11px]">{clause.marketComparisonReason || 'This clause aligns with average standards and presents no atypical deviations.'}</p>
+                      </div>
+                    </div>
+
+                    {/* Analyst Attribution Footer */}
+                    <div className="pt-2 border-t border-hairline flex items-center justify-between">
+                      <span className="text-[9px] text-muted">Analyzed on {new Date().toLocaleDateString()}</span>
+                      <div className="analyst-stamp bg-canvas border border-hairline">
+                        <div className={`contributor-badge w-5 h-5 bg-gradient-to-br ${assignedAnalyst.avatarColor}`}>
+                          {assignedAnalyst.initials}
+                        </div>
+                        <span className="text-muted">{assignedAnalyst.name}</span>
                       </div>
                     </div>
                   </div>
@@ -224,6 +241,38 @@ const ContractDetails = () => {
             </div>
             <Link to={`/chat/${contract._id}`} className="btn-primary w-full py-2 text-xs">Start AI Chat Console</Link>
           </div>
+          {/* Analysis Timeline Card */}
+          <div className="glass-card p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20">
+                <Activity className="h-4 w-4" />
+              </div>
+              <h3 className="text-xs font-semibold text-ink">Analysis History</h3>
+            </div>
+            
+            <div className="analysis-timeline">
+              {getSampleAnalysisHistory().map((item, idx) => (
+                <div key={idx} className="timeline-step">
+                  <div className={`timeline-avatar bg-gradient-to-br ${item.analyst.avatarColor}`}>
+                    {item.analyst.initials}
+                  </div>
+                  <div className="timeline-content w-full">
+                    <div className="timeline-content-label text-ink">
+                      {item.action}
+                    </div>
+                    <div className="text-[9px] text-muted font-medium">
+                      {item.analyst.name}
+                    </div>
+                    <div className="timeline-content-time text-muted">
+                      {item.timestamp.toLocaleDateString()} at {item.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Side-by-Side Comparator Card */}
           <div className="glass-card p-4 space-y-3">
             <div className="p-2 bg-canvas text-primary rounded-xl border border-hairline w-fit"><Layers className="h-5 w-5" /></div>
             <div className="space-y-1">

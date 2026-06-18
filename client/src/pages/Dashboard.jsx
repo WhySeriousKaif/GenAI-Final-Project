@@ -14,6 +14,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import RiskDistributionChart from '../components/RiskDistributionChart';
 import ClauseFrequencyChart from '../components/ClauseFrequencyChart';
 import { RiskScoreBadge } from '../components/RiskBadge';
+import { contributors, getTotalContributions, getContributionPercentage } from '../data/contributorsMock';
 import { 
   FileText, 
   TrendingUp, 
@@ -24,7 +25,8 @@ import {
   Calendar, 
   MessageSquare, 
   UploadCloud, 
-  AlertCircle
+  AlertCircle,
+  Users
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -235,6 +237,55 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Team Contributions Card */}
+      <div className="glass-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Team Contributions</h3>
+              <p className="text-[10px] text-muted mt-0.5">Analysis distribution across team members</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-muted bg-canvas border border-hairline px-3 py-1.5 rounded-lg">
+            Total: {getTotalContributions()} analyses
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+          {contributors.map((contributor) => {
+            const percentage = getContributionPercentage(contributor.id);
+            return (
+              <div key={contributor.id} className="space-y-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className={`contributor-badge w-10 h-10 bg-gradient-to-br ${contributor.avatarColor}`}>
+                    {contributor.initials}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-ink">{contributor.name}</p>
+                    <p className="text-[9px] text-muted">{contributor.role}</p>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] font-bold text-body">{contributor.contributions}</span>
+                    <span className="text-[9px] text-muted">{percentage}%</span>
+                  </div>
+                  <div className="contribution-bar bg-surface-soft">
+                    <div 
+                      className="contribution-fill bg-gradient-to-r from-primary to-primary-active" 
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Graphics Dashboards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Risk Distribution Chart Card */}
@@ -275,68 +326,83 @@ const Dashboard = () => {
                   <th className="pb-2.5 pl-1">Contract Name</th>
                   <th className="pb-2.5">Ingested Date</th>
                   <th className="pb-2.5">Extracted Clauses</th>
+                  <th className="pb-2.5">Analyzed By</th>
                   <th className="pb-2.5">Overall Risk</th>
                   <th className="pb-2.5 text-right pr-1">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-xs text-body">
-                {contracts.map((contract) => (
-                  <tr key={contract._id} className="hover:bg-surface-cream-strong/40 transition-colors group">
-                    <td className="py-3 pl-1 font-semibold text-ink">
-                      <Link to={`/contract/${contract._id}`} className="hover:text-primary transition-colors">
-                        {contract.title}
-                      </Link>
-                    </td>
-                    <td className="py-3 text-muted">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5 text-muted" />
-                        {new Date(contract.uploadedAt).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="py-3 text-body">
-                      <span className="flex flex-wrap gap-1 max-w-xs">
-                        {contract.extractedClauses && contract.extractedClauses.slice(0, 3).map((c, i) => (
-                          <span key={i} className="bg-canvas px-1.5 py-0.5 rounded text-[9px] text-muted font-semibold border border-hairline">
-                            {c.clauseType}
-                          </span>
-                        ))}
-                        {contract.extractedClauses && contract.extractedClauses.length > 3 && (
-                          <span className="text-muted text-[9px] font-bold">
-                            +{contract.extractedClauses.length - 3} more
-                          </span>
-                        )}
-                      </span>
-                    </td>
-                    <td className="py-3">
-                      <RiskScoreBadge score={contract.overallRiskScore} />
-                    </td>
-                    <td className="py-3 text-right pr-1">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Link 
-                          to={`/contract/${contract._id}`} 
-                          title="Open Details"
-                          className="p-1.5 bg-canvas text-body hover:text-ink rounded-md border border-hairline transition-colors"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
+                {contracts.map((contract) => {
+                  // Assign consistent analyst based on contract ID hash
+                  const analystIndex = contract._id.charCodeAt(0) % contributors.length;
+                  const assignedAnalyst = contributors[analystIndex];
+                  
+                  return (
+                    <tr key={contract._id} className="hover:bg-surface-cream-strong/40 transition-colors group">
+                      <td className="py-3 pl-1 font-semibold text-ink">
+                        <Link to={`/contract/${contract._id}`} className="hover:text-primary transition-colors">
+                          {contract.title}
                         </Link>
-                        <Link 
-                          to={`/chat/${contract._id}`} 
-                          title="Open AI RAG Chat"
-                          className="p-1.5 bg-canvas text-primary hover:text-primary-active rounded-md border border-hairline transition-colors"
-                        >
-                          <MessageSquare className="h-3.5 w-3.5" />
-                        </Link>
-                        <button
-                          onClick={(e) => handleDelete(contract._id, e)}
-                          title="Delete Contract"
-                          className="p-1.5 bg-canvas text-error hover:opacity-85 rounded-md border border-hairline transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-3 text-muted">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5 text-muted" />
+                          {new Date(contract.uploadedAt).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="py-3 text-body">
+                        <span className="flex flex-wrap gap-1 max-w-xs">
+                          {contract.extractedClauses && contract.extractedClauses.slice(0, 3).map((c, i) => (
+                            <span key={i} className="bg-canvas px-1.5 py-0.5 rounded text-[9px] text-muted font-semibold border border-hairline">
+                              {c.clauseType}
+                            </span>
+                          ))}
+                          {contract.extractedClauses && contract.extractedClauses.length > 3 && (
+                            <span className="text-muted text-[9px] font-bold">
+                              +{contract.extractedClauses.length - 3} more
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`contributor-badge w-6 h-6 bg-gradient-to-br ${assignedAnalyst.avatarColor}`}>
+                            {assignedAnalyst.initials}
+                          </div>
+                          <span className="text-muted text-xs">{assignedAnalyst.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <RiskScoreBadge score={contract.overallRiskScore} />
+                      </td>
+                      <td className="py-3 text-right pr-1">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link 
+                            to={`/contract/${contract._id}`} 
+                            title="Open Details"
+                            className="p-1.5 bg-canvas text-body hover:text-ink rounded-md border border-hairline transition-colors"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Link>
+                          <Link 
+                            to={`/chat/${contract._id}`} 
+                            title="Open AI RAG Chat"
+                            className="p-1.5 bg-canvas text-primary hover:text-primary-active rounded-md border border-hairline transition-colors"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5" />
+                          </Link>
+                          <button
+                            onClick={(e) => handleDelete(contract._id, e)}
+                            title="Delete Contract"
+                            className="p-1.5 bg-canvas text-error hover:opacity-85 rounded-md border border-hairline transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

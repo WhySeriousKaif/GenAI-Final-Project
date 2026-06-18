@@ -179,3 +179,115 @@ html.dark {
   transition-duration: 0.2s;
   transition-timing-function: ease;
 }
+
+/* =========================================================================
+   Contributor & Team Attribution Styling
+   ========================================================================= */
+@layer components {
+  /* Individual contributor avatar badge */
+  .contributor-badge {
+    @apply inline-flex items-center justify-center rounded-full text-white font-bold text-xs bg-gradient-to-br from-blue-600 to-blue-500 shadow-md border border-blue-400/20 transition-all duration-200;
+  }
+
+  .contributor-badge:hover {
+    @apply scale-110 shadow-lg;
+  }
+
+  /* Stacked overlapping avatars */
+  .contributor-stack {
+    @apply flex items-center -space-x-2;
+  }
+
+  .contributor-stack .contributor-badge {
+    border-width: 2px;
+    border-color: var(--color-canvas);
+  }
+
+  .contributor-stack .contributor-badge:hover {
+    @apply z-50;
+  }
+
+  /* Contribution stats bar */
+  .contribution-bar {
+    background-color: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    @apply w-full h-2 rounded-full overflow-hidden;
+  }
+
+  .contribution-fill {
+    background-image: linear-gradient(to right, var(--color-primary), var(--color-primary-active));
+    @apply h-full transition-all duration-500;
+  }
+
+  /* Analyst attribution stamp */
+  .analyst-stamp {
+    background-color: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium;
+  }
+
+  /* Vertical timeline for analysis steps */
+  .analysis-timeline {
+    @apply space-y-4 relative;
+  }
+
+  .timeline-step {
+    @apply flex gap-3 relative pl-10;
+  }
+
+  .timeline-step::before {
+    content: '';
+    background-image: linear-gradient(to bottom, var(--color-primary), var(--color-primary-active));
+    opacity: 0.2;
+    @apply absolute left-3.5 top-8 bottom-0 w-0.5;
+  }
+
+  .timeline-step:last-child::before {
+    @apply hidden;
+  }
+
+  .timeline-avatar {
+    @apply absolute left-0 top-0 w-8 h-8 rounded-full shadow-md border border-white/20 flex items-center justify-center text-white text-xs font-bold;
+  }
+
+  .timeline-content {
+    @apply pt-1;
+  }
+
+  .timeline-content-label {
+    color: var(--color-ink);
+    @apply text-xs font-semibold;
+  }
+
+  .timeline-content-time {
+    color: var(--color-muted);
+    @apply text-[10px] mt-0.5;
+  }
+
+  /* Color coding by department/role */
+  .analyst-legal {
+    @apply bg-gradient-to-br from-sky-600 to-sky-500;
+  }
+
+  .analyst-finance {
+    @apply bg-gradient-to-br from-emerald-600 to-emerald-500;
+  }
+
+  .analyst-operations {
+    @apply bg-gradient-to-br from-amber-600 to-amber-500;
+  }
+
+  /* Contribution percentage indicator */
+  .contribution-stat {
+    @apply flex flex-col items-center gap-1;
+  }
+
+  .contribution-stat-value {
+    @apply text-sm font-bold text-white;
+  }
+
+  .contribution-stat-label {
+    @apply text-[10px] text-slate-400;
+  }
+}
