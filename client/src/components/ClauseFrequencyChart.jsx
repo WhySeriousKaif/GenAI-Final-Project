@@ -5,7 +5,7 @@
 // documents. It helps users see which clauses are most commonly examined 
 // (e.g. Indemnity, Payment Terms, Termination, etc.).
 
-import React from 'react';
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const ClauseFrequencyChart = ({ contracts }) => {

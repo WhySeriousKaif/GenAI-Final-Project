@@ -10,7 +10,7 @@
 // - Yellow/Caution: Unusual/Medium terms (31-70 risk score)
 // - Red/Warning: Unfavourable/High terms (71-100 risk score)
 
-import React from 'react';
+
 
 /**
  * Renders a pill badge showing the numeric score and a descriptor (Low/Medium/High).

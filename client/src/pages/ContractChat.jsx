@@ -11,10 +11,10 @@
 // - Context Source Inspection Drawer: Highlights the exact paragraphs 
 //   pulled by the in-memory cosine-similarity search.
 
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getContracts, getContractById, chatWithContract } from '../services/api';
-import { MessageSquare, ArrowLeft, Send, Sparkles, AlertCircle, RefreshCw, Layers } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Send } from 'lucide-react';
 
 const ContractChat = () => {
   const { id } = useParams();
@@ -53,17 +53,6 @@ const ContractChat = () => {
     loadContracts();
   }, []);
 
-  // 2. Fetch specific contract details when ID changes
-  useEffect(() => {
-    if (id) {
-      loadActiveContract(id);
-    } else {
-      setSelectedContract(null);
-      setMessages([]);
-      setActiveContext('');
-    }
-  }, [id, contractsList]);
-
   const loadActiveContract = async (contractId) => {
     try {
       const res = await getContractById(contractId);
@@ -83,6 +72,22 @@ const ContractChat = () => {
       console.error(err);
     }
   };
+
+  const resetChat = () => {
+    setSelectedContract(null);
+    setMessages([]);
+    setActiveContext('');
+  };
+
+  // 2. Fetch specific contract details when ID changes
+  useEffect(() => {
+    if (id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadActiveContract(id);
+    } else {
+      resetChat();
+    }
+  }, [id, contractsList]);
 
   // Scroll to bottom of message list
   useEffect(() => {

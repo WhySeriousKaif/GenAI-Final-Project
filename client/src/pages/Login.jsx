@@ -1,7 +1,7 @@
 // =========================================================================
 // Login & User Account Management Workspace Page
 // =========================================================================
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, Mail, User as UserIcon, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -55,7 +55,7 @@ export default function Login() {
           setError(res.message);
         }
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected connection error occurred.');
     } finally {
       setSubmitting(false);
@@ -92,7 +92,7 @@ export default function Login() {
         setError(regRes.message || 'Failed to auto-register demo user.');
         setSubmitting(false);
       }
-    } catch (err) {
+    } catch {
       setError('Connection failed during demo sign-in.');
       setSubmitting(false);
     }

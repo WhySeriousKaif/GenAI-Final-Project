@@ -12,7 +12,7 @@
 // - Expandable panel to inspect raw text extracted from PDF/DOCX.
 // - Interactive node highlight link from the graph to scroll directly to details.
 
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getContractById } from '../services/api';
 import GraphVisualizer from '../components/GraphVisualizer';
@@ -29,7 +29,6 @@ import {
   Activity, 
   Layers, 
   ChevronRight,
-  TrendingUp,
   Scale
 } from 'lucide-react';
 

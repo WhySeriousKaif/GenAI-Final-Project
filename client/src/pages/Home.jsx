@@ -1,10 +1,10 @@
 // =========================================================================
 // LexiCore AI Portal Homepage (Synapse-Inspired Landing Page)
 // =========================================================================
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Terminal, Shield, Cpu, Activity, Database, Layers, BrainCircuit, ArrowRight } from 'lucide-react';
+import { Terminal, Shield, Cpu, Activity, Database, Layers, BrainCircuit } from 'lucide-react';
 
 export default function Home() {
   const { user } = useAuth();

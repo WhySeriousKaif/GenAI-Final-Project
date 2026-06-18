@@ -8,9 +8,9 @@
 // 1. Connection states of MongoDB, Gemini API, and Neo4j.
 // 2. Database Reset Action (wipes MongoDB collections and deletes Neo4j nodes).
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSystemStatus, resetDatabase } from '../services/api';
-import { Settings, ShieldCheck, Database, RefreshCw, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Settings, ShieldCheck, Database, RefreshCw, ShieldAlert } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const AdminDashboard = () => {
@@ -19,10 +19,6 @@ const AdminDashboard = () => {
   const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState('');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  useEffect(() => {
-    fetchStatus();
-  }, []);
 
   const fetchStatus = async () => {
     try {
@@ -37,6 +33,11 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchStatus();
+  }, []);
 
   const handleResetDB = () => {
     setIsConfirmOpen(true);

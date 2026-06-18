@@ -5,9 +5,9 @@
 // It features a premium, semi-translucent glass effect with responsive links
 // and clear active-route styling using React Router.
 
-import React from 'react';
+
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShieldAlert, LayoutDashboard, UploadCloud, FileText, Settings, MessageSquare, LogOut, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, UploadCloud, FileText, Settings, MessageSquare, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {

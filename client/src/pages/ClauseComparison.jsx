@@ -8,11 +8,11 @@
 // 3. Render a beautiful grid table showing the side-by-side comparisons, 
 //    including verbatim texts, section numbers, and risk ratings.
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getContracts, getContractById } from '../services/api';
 import { RiskScoreBadge } from '../components/RiskBadge';
 import CopyButton from '../components/CopyButton';
-import { Layers, FileText, Check, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Layers, Check, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ClauseComparison = () => {
@@ -36,10 +36,6 @@ const ClauseComparison = () => {
   ];
   const [selectedClauses, setSelectedClauses] = useState(['Payment Terms', 'Termination', 'Limitation of Liability']);
 
-  useEffect(() => {
-    fetchContractsList();
-  }, []);
-
   const fetchContractsList = async () => {
     try {
       setLoadingList(true);
@@ -53,6 +49,11 @@ const ClauseComparison = () => {
       setLoadingList(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchContractsList();
+  }, []);
 
   // Toggle contract selection
   const handleToggleContract = (id) => {

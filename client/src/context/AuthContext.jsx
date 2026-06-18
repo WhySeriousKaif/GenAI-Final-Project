@@ -1,7 +1,7 @@
 // =========================================================================
 // React Authentication Context & Provider
 // =========================================================================
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { loginUser, registerUser, getMe, getApiErrorMessage } from '../services/api';
 import { TOKEN_KEY } from '../config/constants';
 
@@ -84,6 +84,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
