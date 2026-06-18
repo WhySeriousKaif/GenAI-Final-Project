@@ -20,6 +20,7 @@ import { RiskScoreBadge, MarketStatusBadge } from '../components/RiskBadge';
 import { getSampleAnalysisHistory, contributors } from '../data/contributorsMock';
 import CopyButton from '../components/CopyButton';
 import ExportReportButton from '../components/ExportReportButton';
+import ClauseRadarChart from '../components/ClauseRadarChart';
 import { 
   FileText, 
   ShieldAlert, 
@@ -30,7 +31,8 @@ import {
   Activity, 
   Layers, 
   ChevronRight,
-  Scale
+  Scale,
+  Radar
 } from 'lucide-react';
 
 const ContractDetails = () => {
@@ -108,6 +110,7 @@ const ContractDetails = () => {
             <div className="flex space-x-5">
               {[
                 ['risks', `Risk Analysis (${clauses.length})`],
+                ['radar', 'Risk Radar'],
                 ['summary', 'Executive Summary'],
                 ['graph', 'Clause Relationship Graph']
               ].map(([tab, label]) => (
@@ -234,7 +237,35 @@ const ContractDetails = () => {
             </div>
           )}
 
-          {/* TAB 3: GRAPH */}
+          {/* TAB 3: RISK RADAR */}
+          {activeTab === 'radar' && (
+            <div className="glass-card p-4 md:p-6 space-y-2">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20">
+                  <Radar className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-ink">Clause Risk Radar</h3>
+                  <p className="text-[10px] text-muted mt-0.5">
+                    Spider chart mapping individual risk scores across all extracted clauses.
+                    Click any label below to jump to that clause in Risk Analysis.
+                  </p>
+                </div>
+              </div>
+              <ClauseRadarChart
+                clauses={clauses}
+                onSelect={(clauseType) => {
+                  setActiveTab('risks');
+                  setHighlightedClauseType(clauseType);
+                  setTimeout(() => {
+                    clauseRefs.current[clauseType]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 120);
+                }}
+              />
+            </div>
+          )}
+
+          {/* TAB 4: GRAPH */}
           {activeTab === 'graph' && <GraphVisualizer graphData={graphData} onNodeClick={handleGraphNodeClick} />}
 
           {/* Raw Text Toggle */}

@@ -26,8 +26,8 @@ export const RiskScoreBadge = ({ score }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}`}>
-      <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+    <span className={badgeClass}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
       {score}% - {label}
     </span>
   );
@@ -38,7 +38,7 @@ export const RiskScoreBadge = ({ score }) => {
  * @param {string} status - Favourable, Unfavourable, or Unusual
  */
 export const MarketStatusBadge = ({ status }) => {
-  let colorClass = 'bg-surface-card text-body border-hairline';
+  let badgeClass = 'badge-market-neutral';
 
   switch (status) {
     case 'Favourable':
@@ -53,7 +53,7 @@ export const MarketStatusBadge = ({ status }) => {
   }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${colorClass}`}>
+    <span className={badgeClass}>
       {status}
     </span>
   );
