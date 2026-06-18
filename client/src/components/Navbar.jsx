@@ -71,10 +71,10 @@ const Navbar = () => {
               </svg>
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-ink font-serif">
+              <span className="text-lg font-bold tracking-tight text-ink font-serif">
                 LexiCore AI
               </span>
-              <span className="hidden sm:block text-[11px] text-primary font-semibold -mt-0.5 uppercase tracking-widest font-sans">
+              <span className="hidden sm:block text-[9px] text-primary font-semibold -mt-1 uppercase tracking-widest font-sans">
                 Legal AI Platform
               </span>
             </div>
@@ -83,7 +83,7 @@ const Navbar = () => {
           {/* Navigation Links & Action triggers */}
           <div className="flex items-center gap-4">
             {user && (
-              <nav className="flex space-x-1.5 sm:space-x-2">
+              <nav className="flex space-x-1 sm:space-x-1.5">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -91,29 +91,29 @@ const Navbar = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
                         active
                           ? 'bg-primary text-white shadow-sm'
                           : 'text-body hover:text-ink hover:bg-surface-soft'
                       }`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5" />
                       <span className="hidden md:inline">{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
             )}
-
+ 
             {/* Contributor Avatar Stack */}
             {user && (
               <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-navy-800/80">
-                <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Team:</span>
+                <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Team:</span>
                 <div className="contributor-stack group">
                   {getTopContributors().map((contributor) => (
                     <div
                       key={contributor.id}
-                      className={`contributor-badge w-8 h-8 bg-gradient-to-br ${contributor.avatarColor}`}
+                      className={`contributor-badge w-7 h-7 bg-gradient-to-br ${contributor.avatarColor}`}
                       title={contributor.name}
                     >
                       {contributor.initials}
@@ -122,31 +122,31 @@ const Navbar = () => {
                 </div>
               </div>
             )}
-
+ 
             {user ? (
-              <div className="flex items-center gap-3 pl-3 border-l border-hairline">
+              <div className="flex items-center gap-2 pl-3 border-l border-hairline">
                 {/* Dark Mode Toggle */}
                 <button
                   onClick={toggle}
-                  className="btn-theme-toggle p-2.5"
+                  className="btn-theme-toggle"
                   title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                   aria-label="Toggle dark mode"
                 >
                   {isDark
-                    ? <Sun className="w-4.5 h-4.5" />
-                    : <Moon className="w-4.5 h-4.5" />}
+                    ? <Sun className="w-4 h-4" />
+                    : <Moon className="w-4 h-4" />}
                 </button>
-
+ 
                 <div className="hidden lg:flex flex-col text-right">
-                  <span className="text-sm font-semibold text-ink">{user.username}</span>
-                  <span className="text-[10px] text-primary font-semibold uppercase tracking-wider">{user.role}</span>
+                  <span className="text-xs font-semibold text-ink">{user.username}</span>
+                  <span className="text-[9px] text-primary font-semibold uppercase tracking-wider">{user.role}</span>
                 </div>
                 <button
                   onClick={handleLogoutClick}
-                  className="btn-secondary py-2"
+                  className="btn-secondary py-1.5"
                   title="Sign Out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Sign Out</span>
                 </button>
               </div>
