@@ -15,14 +15,14 @@
 export const RiskScoreBadge = ({ score }) => {
   const numScore = Number(score);
   let label = 'Low';
-  let colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40';
+  let badgeClass = 'badge-low';
 
   if (numScore > 70) {
     label = 'High Risk';
-    colorClass = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/40';
+    badgeClass = 'badge-high';
   } else if (numScore > 30) {
     label = 'Medium Risk';
-    colorClass = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40';
+    badgeClass = 'badge-medium';
   }
 
   return (
@@ -42,13 +42,13 @@ export const MarketStatusBadge = ({ status }) => {
 
   switch (status) {
     case 'Favourable':
-      colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40';
+      badgeClass = 'badge-market-favourable';
       break;
     case 'Unfavourable':
-      colorClass = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/40';
+      badgeClass = 'badge-market-unfavourable';
       break;
     case 'Unusual':
-      colorClass = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40';
+      badgeClass = 'badge-market-unusual';
       break;
   }
 
