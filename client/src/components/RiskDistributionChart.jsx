@@ -69,15 +69,15 @@ const RiskDistributionChart = ({ contracts }) => {
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || (isDark ? '#80838d' : '#8e8b82')} />
+              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || (isDark ? '#80838d' : '#94a3b8')} />
             ))}
           </Pie>
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: isDark ? '#111216' : '#faf9f5',
-              borderColor: isDark ? '#1d1f24' : '#e6dfd8',
+              backgroundColor: isDark ? '#111216' : '#e8eff6',
+              borderColor: isDark ? '#1d1f24' : '#dbe1e8',
               borderRadius: '8px',
-              color: isDark ? '#ffffff' : '#141413',
+              color: isDark ? '#ffffff' : '#0f172a',
               fontSize: '11px'
             }} 
           />
@@ -85,7 +85,7 @@ const RiskDistributionChart = ({ contracts }) => {
             verticalAlign="bottom" 
             height={36} 
             iconType="circle"
-            formatter={(value) => <span style={{ color: isDark ? '#80838d' : '#6c6a64', fontSize: '11px' }}>{value}</span>}
+            formatter={(value) => <span style={{ color: isDark ? '#80838d' : '#64748b', fontSize: '11px' }}>{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>

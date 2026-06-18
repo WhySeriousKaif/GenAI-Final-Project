@@ -136,30 +136,30 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-canvas border border-hairline rounded-xl p-6">
+          <div className="bg-surface-card border border-hairline rounded-xl p-6 hover:bg-surface-cream-strong transition-all duration-300 group">
             <div className="flex items-center gap-2 mb-3">
-              <Cpu className="w-4.5 h-4.5 text-primary" />
-              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans">Visual Bounding Core</h4>
+              <Cpu className="w-4.5 h-4.5 text-primary group-hover:scale-110 transition-transform" />
+              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans group-hover:text-primary transition-colors">Visual Bounding Core</h4>
             </div>
             <p className="text-muted text-sm leading-relaxed">
               Ingests PDFs, strips structure layers, extracts legal terminology mapping coordinates, and writes clean payload entries.
             </p>
           </div>
 
-          <div className="bg-canvas border border-hairline rounded-xl p-6">
+          <div className="bg-surface-card border border-hairline rounded-xl p-6 hover:bg-surface-cream-strong transition-all duration-300 group">
             <div className="flex items-center gap-2 mb-3">
-              <Database className="w-4.5 h-4.5 text-primary" />
-              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans">Neo4j Network Schema</h4>
+              <Database className="w-4.5 h-4.5 text-primary group-hover:scale-110 transition-transform" />
+              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans group-hover:text-primary transition-colors">Neo4j Network Schema</h4>
             </div>
             <p className="text-muted text-sm leading-relaxed">
               Resolves agreement entities, cross-references clauses, and identifies conflict paths inside a high-speed graph network.
             </p>
           </div>
 
-          <div className="bg-canvas border border-hairline rounded-xl p-6">
+          <div className="bg-surface-card border border-hairline rounded-xl p-6 hover:bg-surface-cream-strong transition-all duration-300 group">
             <div className="flex items-center gap-2 mb-3">
-              <Layers className="w-4.5 h-4.5 text-primary" />
-              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans">Dual Storage Pipeline</h4>
+              <Layers className="w-4.5 h-4.5 text-primary group-hover:scale-110 transition-transform" />
+              <h4 className="text-sm uppercase font-bold text-ink tracking-wider font-sans group-hover:text-primary transition-colors">Dual Storage Pipeline</h4>
             </div>
             <p className="text-muted text-sm leading-relaxed">
               Stores raw metadata in MongoDB Atlas collections while publishing relationship linkages directly to Neo4j.

@@ -72,10 +72,10 @@ const ClauseFrequencyChart = ({ contracts }) => {
           />
           <Tooltip
             contentStyle={{ 
-              backgroundColor: isDark ? '#111216' : '#faf9f5',
-              borderColor: isDark ? '#1d1f24' : '#e6dfd8',
+              backgroundColor: isDark ? '#111216' : '#e8eff6',
+              borderColor: isDark ? '#1d1f24' : '#dbe1e8',
               borderRadius: '8px',
-              color: isDark ? '#ffffff' : '#141413',
+              color: isDark ? '#ffffff' : '#0f172a',
               fontSize: '11px'
             }}
             cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.04)' : 'rgba(37, 99, 235, 0.06)' }}
