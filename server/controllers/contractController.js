@@ -1,15 +1,14 @@
 // =========================================================================
-// Contract Controller
+// Contract Controller (thin HTTP layer)
 // =========================================================================
-// This controller acts as the traffic cop for all contract-related requests.
-// It coordinates between text extraction, AI services, MongoDB models,
-// and the Neo4j graph database.
-// 
-// Every function is designed to be highly readable, showing how full-stack
-// operations (File Upload -> DB Insert -> Graph Sync -> Response) are sequenced.
+// Controllers validate input, delegate to services, and shape responses. They
+// THROW AppError for expected failures; the central errorHandler formats them.
+// No per-handler try/catch — asyncHandler forwards rejections to the pipeline.
 
 const fs = require('fs');
 const Contract = require('../models/Contract');
+const asyncHandler = require('../middleware/asyncHandler');
+const AppError = require('../errors/AppError');
 const { ingestContract } = require('../services/contractIngestionService');
 const { deleteContractFromGraph, getContractGraphData } = require('../services/neo4jService');
 
@@ -22,12 +21,13 @@ const cleanupTempFile = (filePath) => {
 
 /**
  * 1. UPLOAD AND ANALYZE CONTRACT
- * Thin HTTP layer: validates the upload, delegates the pipeline to the ingestion
- * service, manages the temp-file lifecycle, and shapes the response.
+ * Validates the upload, delegates the pipeline to the ingestion service, and
+ * always cleans up the temp file. ExtractionError (422) and other failures
+ * propagate to the central error handler.
  */
-const uploadAndAnalyzeContract = async (req, res) => {
+const uploadAndAnalyzeContract = asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ success: false, message: 'Please upload a PDF or DOCX file.' });
+    throw new AppError('Please upload a PDF or DOCX file.', 400);
   }
 
   const { path: filePath, originalname: originalName, size } = req.file;
@@ -42,148 +42,94 @@ const uploadAndAnalyzeContract = async (req, res) => {
       contractId: savedContract._id,
       overallRiskScore: savedContract.overallRiskScore
     });
-  } catch (error) {
-    // Extraction failures are client errors (422); everything else is a 500.
-    if (error.statusCode === 422) {
-      return res.status(422).json({ success: false, message: error.message });
-    }
-
-    console.error(`[Upload Controller Crash]: ${error.message}`);
-    return res.status(500).json({
-      success: false,
-      message: 'An internal server error occurred during document analysis.',
-      error: error.message
-    });
   } finally {
     cleanupTempFile(filePath);
   }
-};
+});
 
 /**
- * 2. GET ALL CONTRACTS
- * Retrieves the contract registry list. Supports simple title filtering.
+ * 2. GET ALL CONTRACTS — registry list with optional title filter.
  */
-const getAllContracts = async (req, res) => {
-  try {
-    const { search } = req.query;
-    let filter = {};
+const getAllContracts = asyncHandler(async (req, res) => {
+  const { search } = req.query;
+  const filter = search ? { title: { $regex: search, $options: 'i' } } : {};
 
-    if (search) {
-      filter = { title: { $regex: search, $options: 'i' } };
-    }
+  const contracts = await Contract.find(filter)
+    .select('title uploadedAt overallRiskScore extractedClauses.clauseType')
+    .sort({ uploadedAt: -1 });
 
-    // Select only header info (excluding massive rawText fields) for speed
-    const contracts = await Contract.find(filter)
-      .select('title uploadedAt overallRiskScore extractedClauses.clauseType')
-      .sort({ uploadedAt: -1 });
-
-    return res.status(200).json({ success: true, count: contracts.length, contracts });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  return res.status(200).json({ success: true, count: contracts.length, contracts });
+});
 
 /**
  * 3. GET CONTRACT DETAILS & GRAPH NODES
- * Returns the full contract data and constructs its graphical node representation.
  */
-const getContractById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const contract = await Contract.findById(id);
-
-    if (!contract) {
-      return res.status(404).json({ success: false, message: 'Contract not found.' });
-    }
-
-    // Pull node-link structures for the frontend graph visualizer
-    const graphData = await getContractGraphData(contract);
-
-    return res.status(200).json({
-      success: true,
-      contract,
-      graphData
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+const getContractById = asyncHandler(async (req, res) => {
+  const contract = await Contract.findById(req.params.id);
+  if (!contract) {
+    throw new AppError('Contract not found.', 404);
   }
-};
+
+  const graphData = await getContractGraphData(contract);
+  return res.status(200).json({ success: true, contract, graphData });
+});
 
 /**
- * 4. DELETE CONTRACT
- * Removes the contract from MongoDB and cleans up its Neo4j graph nodes.
+ * 4. DELETE CONTRACT — removes from MongoDB and the graph database.
  */
-const deleteContract = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const contract = await Contract.findByIdAndDelete(id);
-
-    if (!contract) {
-      return res.status(404).json({ success: false, message: 'Contract not found.' });
-    }
-
-    // Delete related nodes in graph database
-    await deleteContractFromGraph(id);
-
-    return res.status(200).json({
-      success: true,
-      message: `Contract "${contract.title}" deleted successfully.`
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+const deleteContract = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const contract = await Contract.findByIdAndDelete(id);
+  if (!contract) {
+    throw new AppError('Contract not found.', 404);
   }
-};
+
+  await deleteContractFromGraph(id);
+  return res.status(200).json({
+    success: true,
+    message: `Contract "${contract.title}" deleted successfully.`
+  });
+});
 
 /**
- * 5. GLOBAL SEARCH (Feature 8)
- * Performs matching searches across all contracts, querying both filenames and clause texts.
+ * 5. GLOBAL SEARCH — scans titles and clause texts for a keyword.
  */
-const globalSearch = async (req, res) => {
-  try {
-    const { q } = req.query;
-    if (!q) {
-      return res.status(400).json({ success: false, message: 'Search term is empty.' });
-    }
-
-    console.log(`[Search] Running global query for keyword: "${q}"`);
-
-    // Matches titles or matches clauseText inside nested arrays
-    const results = await Contract.find({
-      $or: [
-        { title: { $regex: q, $options: 'i' } },
-        { "extractedClauses.clauseText": { $regex: q, $options: 'i' } }
-      ]
-    }).select('title overallRiskScore uploadedAt extractedClauses');
-
-    // Filter results to return the specific matching clauses and highlight matches
-    const searchMatches = [];
-
-    results.forEach(contract => {
-      contract.extractedClauses.forEach(clause => {
-        if (clause.clauseText.toLowerCase().includes(q.toLowerCase())) {
-          searchMatches.push({
-            contractId: contract._id,
-            contractTitle: contract.title,
-            overallRiskScore: contract.overallRiskScore,
-            clauseType: clause.clauseType,
-            clauseText: clause.clauseText,
-            sectionNumber: clause.sectionNumber,
-            riskScore: clause.riskScore,
-            riskType: clause.riskType
-          });
-        }
-      });
-    });
-
-    return res.status(200).json({
-      success: true,
-      count: searchMatches.length,
-      matches: searchMatches
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+const globalSearch = asyncHandler(async (req, res) => {
+  const { q } = req.query;
+  if (!q) {
+    throw new AppError('Search term is empty.', 400);
   }
-};
+
+  console.log(`[Search] Running global query for keyword: "${q}"`);
+
+  const results = await Contract.find({
+    $or: [
+      { title: { $regex: q, $options: 'i' } },
+      { 'extractedClauses.clauseText': { $regex: q, $options: 'i' } }
+    ]
+  }).select('title overallRiskScore uploadedAt extractedClauses');
+
+  const needle = q.toLowerCase();
+  const searchMatches = [];
+  results.forEach((contract) => {
+    contract.extractedClauses.forEach((clause) => {
+      if (clause.clauseText.toLowerCase().includes(needle)) {
+        searchMatches.push({
+          contractId: contract._id,
+          contractTitle: contract.title,
+          overallRiskScore: contract.overallRiskScore,
+          clauseType: clause.clauseType,
+          clauseText: clause.clauseText,
+          sectionNumber: clause.sectionNumber,
+          riskScore: clause.riskScore,
+          riskType: clause.riskType
+        });
+      }
+    });
+  });
+
+  return res.status(200).json({ success: true, count: searchMatches.length, matches: searchMatches });
+});
 
 module.exports = {
   uploadAndAnalyzeContract,
