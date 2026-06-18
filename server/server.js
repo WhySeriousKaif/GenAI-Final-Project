@@ -17,15 +17,18 @@ const chatRoutes = require('./routes/chatRoutes');
 const authRoutes = require('./routes/authRoutes');
 const { protect, authorize } = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
-const { checkNeo4jStatus } = require('./services/neo4jService');
+const { checkNeo4jStatus, initNeo4j, purgeAll } = require('./services/neo4jService');
+const { isGeminiEnabled } = require('./config/aiConfig');
+const asyncHandler = require('./middleware/asyncHandler');
 const Contract = require('./models/Contract');
 
 // 1. Initialize Express App
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 2. Connect to MongoDB
+// 2. Connect to MongoDB and initialize the Neo4j graph connection
 connectDB();
+initNeo4j();
 
 // 3. Setup Global Middleware
 app.use(cors()); // CORS allows frontend applications hosted on separate ports (like Vite on 5173) to communicate with this API
@@ -45,7 +48,7 @@ app.use('/api/chat', protect, chatRoutes);
 
 // 6. Admin API (Special Utility Endpoints for Viva Demonstrations)
 app.get('/api/admin/status', protect, (req, res) => {
-  const isGeminiActive = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '' && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here');
+  const isGeminiActive = isGeminiEnabled;
   const neo4jStatus = checkNeo4jStatus();
 
   return res.status(200).json({
@@ -59,32 +62,18 @@ app.get('/api/admin/status', protect, (req, res) => {
 });
 
 // Delete all contracts from Database (Demo Reset Tool)
-app.post('/api/admin/reset-db', protect, authorize('admin'), async (req, res) => {
-  try {
-    const result = await Contract.deleteMany({});
-    console.warn('[Admin] Reset database requested. All contracts purged.');
-    
-    // Attempt Neo4j complete purge if active
-    const { checkNeo4jStatus } = require('./services/neo4jService');
-    const neo4jStatus = checkNeo4jStatus();
-    if (neo4jStatus.isConnected) {
-      const neo4j = require('neo4j-driver');
-      const driver = neo4j.driver(process.env.NEO4J_URI, neo4j.auth.basic(process.env.NEO4J_USERNAME, process.env.NEO4J_PASSWORD));
-      const session = driver.session();
-      await session.run('MATCH (n) DETACH DELETE n');
-      await session.close();
-      await driver.close();
-      console.warn('[Admin] Neo4j database graph purged.');
-    }
+app.post('/api/admin/reset-db', protect, authorize('admin'), asyncHandler(async (req, res) => {
+  const result = await Contract.deleteMany({});
+  console.warn('[Admin] Reset database requested. All contracts purged.');
 
-    return res.status(200).json({
-      success: true,
-      message: `Database successfully reset. ${result.deletedCount} contracts deleted.`
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-});
+  // Encapsulated graph purge (no-op if Neo4j is offline).
+  await purgeAll();
+
+  return res.status(200).json({
+    success: true,
+    message: `Database successfully reset. ${result.deletedCount} contracts deleted.`
+  });
+}));
 
 // Helper to determine Mongoose connection string status
 const mongoose = require('mongoose');

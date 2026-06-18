@@ -1,10 +1,20 @@
 // =========================================================================
 // RAG Contract Chat Console Page Component
 // =========================================================================
-import React, { useEffect, useState, useRef } from 'react';
+// This page provides a full chat console interface enabling interactive 
+// natural-language querying of contract contents.
+// 
+// Key features:
+// - Automatic URL lock-in for specific contracts, with a sidebar selector fallback.
+// - Quick-query chips (pre-built prompt shortcuts) to facilitate quick demos.
+// - Conversation message history (User bubbles vs AI bubbles).
+// - Context Source Inspection Drawer: Highlights the exact paragraphs 
+//   pulled by the in-memory cosine-similarity search.
+
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getContracts, getContractById, chatWithContract } from '../services/api';
-import { MessageSquare, ArrowLeft, Send, Sparkles } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Send } from 'lucide-react';
 
 const ContractChat = () => {
   const { id } = useParams();
@@ -34,11 +44,6 @@ const ContractChat = () => {
     loadContracts();
   }, []);
 
-  useEffect(() => {
-    if (id) { loadActiveContract(id); }
-    else { setSelectedContract(null); setMessages([]); setActiveContext(''); }
-  }, [id, contractsList]);
-
   const loadActiveContract = async (contractId) => {
     try {
       const res = await getContractById(contractId);
@@ -50,6 +55,23 @@ const ContractChat = () => {
     } catch (err) { console.error(err); }
   };
 
+  const resetChat = () => {
+    setSelectedContract(null);
+    setMessages([]);
+    setActiveContext('');
+  };
+
+  // 2. Fetch specific contract details when ID changes
+  useEffect(() => {
+    if (id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadActiveContract(id);
+    } else {
+      resetChat();
+    }
+  }, [id, contractsList]);
+
+  // Scroll to bottom of message list
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loadingAnswer]);

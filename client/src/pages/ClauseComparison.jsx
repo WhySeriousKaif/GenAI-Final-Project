@@ -1,24 +1,31 @@
 // =========================================================================
 // Clause Comparison Page Component
 // =========================================================================
-import React, { useEffect, useState } from 'react';
+// This page implements the batch contract comparison feature.
+// It allows users to:
+// 1. Select multiple ingested contracts from a checklist.
+// 2. Select specific clause types they want to compare.
+// 3. Render a beautiful grid table showing the side-by-side comparisons, 
+//    including verbatim texts, section numbers, and risk ratings.
+
+import { useEffect, useState } from 'react';
 import { getContracts, getContractById } from '../services/api';
 import { RiskScoreBadge } from '../components/RiskBadge';
 import CopyButton from '../components/CopyButton';
-import { Layers, FileText, Check, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Layers, Check, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ClauseComparison = () => {
   const [contractsList, setContractsList] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
+  
+  // Selection states
   const [selectedContractIds, setSelectedContractIds] = useState([]);
   const [comparedContracts, setComparedContracts] = useState([]);
   const [loadingComparison, setLoadingComparison] = useState(false);
 
   const clauseTypes = ['Payment Terms', 'Termination', 'Limitation of Liability', 'Indemnity', 'IP Ownership', 'Governing Law', 'Confidentiality'];
   const [selectedClauses, setSelectedClauses] = useState(['Payment Terms', 'Termination', 'Limitation of Liability']);
-
-  useEffect(() => { fetchContractsList(); }, []);
 
   const fetchContractsList = async () => {
     try {
@@ -29,7 +36,19 @@ const ClauseComparison = () => {
     finally { setLoadingList(false); }
   };
 
-  const handleToggleContract = (id) => setSelectedContractIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchContractsList();
+  }, []);
+
+  // Toggle contract selection
+  const handleToggleContract = (id) => {
+    setSelectedContractIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
+    );
+  };
   const handleToggleClause = (type) => setSelectedClauses(prev => prev.includes(type) ? prev.filter(i => i !== type) : [...prev, type]);
 
   const handleCompareSubmit = async () => {

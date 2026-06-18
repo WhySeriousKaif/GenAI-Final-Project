@@ -6,7 +6,6 @@
 // persistent Navbar component and checking matching routes to display
 // pages dynamically.
 
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';

@@ -1,7 +1,11 @@
 // =========================================================================
 // Clause Type Frequency Bar Chart (Recharts)
 // =========================================================================
-import React from 'react';
+// This component displays a bar chart of clause frequency across all ingested 
+// documents. It helps users see which clauses are most commonly examined 
+// (e.g. Indemnity, Payment Terms, Termination, etc.).
+
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 
@@ -41,7 +45,7 @@ const ClauseFrequencyChart = ({ contracts }) => {
   }
 
   // Dark/Light aware colors
-  const COLORS = isDark 
+  const COLORS = isDark
     ? ['#3b82f6', '#ff9a2e', '#ffffff', '#10b981', '#9a8df2', '#ec4899', '#f43f5e']
     : ['#cc785c', '#d4a017', '#5db872', '#8b7355', '#a9583e', '#6c6a64', '#3d3d3a'];
 
@@ -61,15 +65,15 @@ const ClauseFrequencyChart = ({ contracts }) => {
             tickLine={false}
           />
           <YAxis 
-            tick={{ fill: labelColor, fontSize: 9 }} 
+            tick={{ fill: labelColor, fontSize: 9 }}
             allowDecimals={false}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{ 
-              backgroundColor: isDark ? '#111216' : '#faf9f5', 
-              borderColor: isDark ? '#1d1f24' : '#e6dfd8', 
+              backgroundColor: isDark ? '#111216' : '#faf9f5',
+              borderColor: isDark ? '#1d1f24' : '#e6dfd8',
               borderRadius: '8px',
               color: isDark ? '#ffffff' : '#141413',
               fontSize: '11px'

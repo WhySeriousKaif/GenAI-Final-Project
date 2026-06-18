@@ -104,8 +104,9 @@ Create a `.env` file in the `server/` directory (see `server/.env.example`):
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/legal_doc_intel
 GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_KEY
+JWT_SECRET=change_this_to_a_long_random_secret
 NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
+NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=yourpassword
 ```
 *(If `GEMINI_API_KEY` is omitted, the application runs in Offline Heuristics mode. If Neo4j parameters are omitted or connection fails, the application switches to in-memory graph construction.)*

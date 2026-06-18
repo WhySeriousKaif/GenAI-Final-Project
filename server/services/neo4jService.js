@@ -15,16 +15,25 @@ const neo4j = require('neo4j-driver');
 
 let driver = null;
 let isConnected = false;
+let uri = null;
 
-const uri = process.env.NEO4J_URI;
-const username = process.env.NEO4J_USERNAME;
-const password = process.env.NEO4J_PASSWORD;
+/**
+ * Initializes the Neo4j connection from environment configuration. Called
+ * explicitly at server startup (NOT at import time) so the module has no
+ * side effects on require — making it safe to import in tests/tools.
+ */
+const initNeo4j = () => {
+  uri = process.env.NEO4J_URI;
+  const username = process.env.NEO4J_USERNAME;
+  const password = process.env.NEO4J_PASSWORD;
 
-// Attempt to connect to Neo4j if configured
-if (uri && username && password) {
+  if (!(uri && username && password)) {
+    console.warn('[Neo4j] Configuration missing. Running in Mock Graph Mode.');
+    return;
+  }
+
   try {
     driver = neo4j.driver(uri, neo4j.auth.basic(username, password));
-    // Verify connection
     driver.verifyConnectivity()
       .then(() => {
         isConnected = true;
@@ -36,9 +45,7 @@ if (uri && username && password) {
   } catch (error) {
     console.warn(`[Neo4j Warning] Driver initialization failed. Fallback to Mock Graph: ${error.message}`);
   }
-} else {
-  console.warn('[Neo4j] Configuration missing. Running in Mock Graph Mode.');
-}
+};
 
 /**
  * Parses clause texts to discover cross-references.
@@ -194,10 +201,32 @@ const deleteContractFromGraph = async (contractId) => {
 };
 
 /**
- * Returns graph representation (Nodes and Edges) for a contract.
- * If Neo4j is offline/mock, computes using local helper functions.
+ * Purges the entire Neo4j graph (all nodes + relationships). Encapsulates the
+ * Cypher that previously lived inline in server.js, and reuses the existing
+ * connection instead of spinning up a new driver. No-op when offline.
+ * @returns {Promise<boolean>} true if a purge ran.
  */
-const getContractGraphData = async (contract) => {
+const purgeAll = async () => {
+  if (!isConnected || !driver) return false;
+
+  const session = driver.session();
+  try {
+    await session.run('MATCH (n) DETACH DELETE n');
+    console.warn('[Neo4j] Database graph purged.');
+    return true;
+  } catch (error) {
+    console.error(`[Neo4j Error] Failed to purge graph: ${error.message}`);
+    return false;
+  } finally {
+    await session.close();
+  }
+};
+
+/**
+ * Returns the graph representation (nodes + edges) for a contract, computed from
+ * the embedded clause data. Synchronous — the contract is already in memory.
+ */
+const getContractGraphData = (contract) => {
   const contractId = contract._id.toString();
   const nodes = [];
   const links = [];
@@ -243,9 +272,11 @@ const getContractGraphData = async (contract) => {
 };
 
 module.exports = {
+  initNeo4j,
   syncContractToGraph,
   deleteContractFromGraph,
   getContractGraphData,
   extractCrossReferences,
+  purgeAll,
   checkNeo4jStatus: () => ({ isConnected, uri })
 };

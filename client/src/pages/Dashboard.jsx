@@ -7,7 +7,7 @@
 // 3. Analytics Charts (Risk distribution and clause type frequency).
 // 4. Document Registry (Interactive table showing recent uploads).
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getContracts, deleteContract, globalSearch } from '../services/api';
 import ConfirmModal from '../components/ConfirmModal';
@@ -32,19 +32,14 @@ import {
 const Dashboard = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+  const [, setError] = useState(null);
+
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
-  const [searching, setSearching] = useState(false);
+  const [, setSearching] = useState(false);
 
   const [deleteContractId, setDeleteContractId] = useState(null);
-
-  // Load contracts on mount
-  useEffect(() => {
-    fetchContracts();
-  }, []);
 
   const fetchContracts = async () => {
     try {
@@ -61,6 +56,12 @@ const Dashboard = () => {
     }
   };
 
+  // Load contracts on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchContracts();
+  }, []);
+
   const handleDelete = (id, e) => {
     e.preventDefault(); // Stop row click propagation
     setDeleteContractId(id);
@@ -75,7 +76,7 @@ const Dashboard = () => {
         // Clear search results if a contract was deleted
         if (searchResults) setSearchResults(null);
       }
-    } catch (err) {
+    } catch {
       alert('Failed to delete contract.');
     } finally {
       setDeleteContractId(null);
