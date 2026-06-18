@@ -33,9 +33,9 @@
   --color-warning:              #d4a017;
   --color-error:                #c64545;
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:  'JetBrains Mono', monospace;
+  --font-serif: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* =========================================================================
