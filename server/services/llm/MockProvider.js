@@ -12,6 +12,7 @@
 const LLMProvider = require('./LLMProvider');
 const { extractClauses } = require('../rules/clauseRules');
 const { resolveOfflineAnswer } = require('../rules/answerRules');
+const { computeOverallRiskScore } = require('../riskScoring');
 
 class MockProvider extends LLMProvider {
   get canEmbed() {
@@ -39,9 +40,8 @@ class MockProvider extends LLMProvider {
 // =========================================================================
 
 function generateMockSummary(text, clauses) {
-  let totalScore = 0;
-  clauses.forEach((c) => (totalScore += c.riskScore));
-  const avgScore = clauses.length > 0 ? Math.round(totalScore / clauses.length) : 50;
+  // Preserve original behavior: default to 50 when there are no clauses.
+  const avgScore = clauses.length > 0 ? computeOverallRiskScore(clauses) : 50;
 
   const parties = [];
   const matches = text.match(/between\s+([A-Z][a-zA-Z0-9\s,\.]+?)(?:\s+and\s+|,)/);

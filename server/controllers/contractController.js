@@ -10,130 +10,52 @@
 
 const fs = require('fs');
 const Contract = require('../models/Contract');
-const { extractTextFromFile } = require('../services/textExtractor');
-const { analyzeContractText, generateExecutiveSummary } = require('../services/aiService');
-const { generateEmbeddings, fitsDocLimit } = require('../services/ragService');
-const { syncContractToGraph, deleteContractFromGraph, getContractGraphData } = require('../services/neo4jService');
+const { ingestContract } = require('../services/contractIngestionService');
+const { deleteContractFromGraph, getContractGraphData } = require('../services/neo4jService');
+
+/** Best-effort removal of the multer temp file. */
+const cleanupTempFile = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
 
 /**
  * 1. UPLOAD AND ANALYZE CONTRACT
- * Handles: File upload -> Text Extraction -> Gemini Clause Analysis -> Executive Summary -> MongoDB Save -> Neo4j Sync
+ * Thin HTTP layer: validates the upload, delegates the pipeline to the ingestion
+ * service, manages the temp-file lifecycle, and shapes the response.
  */
 const uploadAndAnalyzeContract = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'Please upload a PDF or DOCX file.' });
+  }
+
+  const { path: filePath, originalname: originalName, size } = req.file;
+  console.log(`[Controller] Ingesting file: ${originalName} (Size: ${size} bytes)`);
+
   try {
-    // Multer stores the uploaded file details in req.file
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please upload a PDF or DOCX file.' });
-    }
+    const savedContract = await ingestContract(filePath, originalName);
 
-    const filePath = req.file.path;
-    const originalName = req.file.originalname;
-    console.log(`[Controller] Ingesting file: ${originalName} (Size: ${req.file.size} bytes)`);
-
-    // Step A: Extract plain text from the uploaded document (PDF/DOCX)
-    let extractedText = '';
-    try {
-      extractedText = await extractTextFromFile(filePath, originalName);
-    } catch (extractionError) {
-      // Clean up file from server if extraction fails
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      return res.status(422).json({ success: false, message: extractionError.message });
-    }
-
-    // Step B: Call Gemini AI to extract clauses, evaluate risks, and compare standards
-    console.log('[Controller] Triggering AI clause extraction...');
-    let extractedClauses = [];
-    try {
-      extractedClauses = await analyzeContractText(extractedText);
-    } catch (aiError) {
-      console.error(`[AI Error]: ${aiError.message}`);
-      // Continue with empty clauses or handle error
-    }
-
-    // Step C: Generate a one-page Executive Summary
-    console.log('[Controller] Triggering AI executive summary generation...');
-    let summary = null;
-    try {
-      summary = await generateExecutiveSummary(extractedText, extractedClauses);
-    } catch (summaryError) {
-      console.error(`[Summary AI Error]: ${summaryError.message}`);
-    }
-
-    // Step D: Calculate the overall risk score as the average of extracted clause risk scores
-    let overallRiskScore = 0;
-    if (extractedClauses.length > 0) {
-      const sum = extractedClauses.reduce((acc, c) => acc + Number(c.riskScore), 0);
-      overallRiskScore = Math.round(sum / extractedClauses.length);
-    }
-    
-    if (summary && !summary.overallRiskScore) {
-      summary.overallRiskScore = overallRiskScore;
-    } else if (summary) {
-      // Sync values
-      overallRiskScore = summary.overallRiskScore;
-    }
-
-    // Step E: Save the new Contract record in MongoDB
-    console.log('[Controller] Saving contract record in MongoDB...');
-    const newContract = new Contract({
-      title: originalName,
-      rawText: extractedText,
-      extractedClauses: extractedClauses,
-      summary: summary,
-      overallRiskScore: overallRiskScore
-    });
-
-    // Step E.5: Precompute and cache online embeddings so RAG chat is fast (one
-    // query embedding per question instead of re-embedding the whole document).
-    // Runs inline since upload already awaits the AI pipeline. Online-only, and
-    // skipped if vectors would push the document past MongoDB's 16MB limit.
-    // Never blocks the upload — chat lazily computes embeddings if this is skipped.
-    try {
-      const embeddings = await generateEmbeddings(extractedText);
-      if (embeddings) {
-        if (fitsDocLimit(extractedText, embeddings)) {
-          newContract.embeddings = embeddings;
-          console.log(`[Controller] Cached ${embeddings.chunks.length} chunk embeddings for RAG.`);
-        } else {
-          console.warn('[Controller] Embeddings exceed safe document size; skipping cache (chat will compute on demand).');
-        }
-      }
-    } catch (embedError) {
-      console.error(`[Embedding Cache Error]: ${embedError.message}`);
-    }
-
-    const savedContract = await newContract.save();
-
-    // Step F: Sync the nodes and links to the Neo4j Graph Database
-    console.log('[Controller] Syncing nodes to Neo4j...');
-    await syncContractToGraph(savedContract);
-
-    // Step G: Clean up the uploaded file from server disk (since the text is now safely in MongoDB)
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    // Return the response containing the saved document ID for navigation
     return res.status(201).json({
       success: true,
       message: 'Contract uploaded and analyzed successfully!',
       contractId: savedContract._id,
       overallRiskScore: savedContract.overallRiskScore
     });
-
   } catch (error) {
-    console.error(`[Upload Controller Crash]: ${error.message}`);
-    
-    // Safety file clean up
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    // Extraction failures are client errors (422); everything else is a 500.
+    if (error.statusCode === 422) {
+      return res.status(422).json({ success: false, message: error.message });
     }
 
+    console.error(`[Upload Controller Crash]: ${error.message}`);
     return res.status(500).json({
       success: false,
       message: 'An internal server error occurred during document analysis.',
       error: error.message
     });
+  } finally {
+    cleanupTempFile(filePath);
   }
 };
 
