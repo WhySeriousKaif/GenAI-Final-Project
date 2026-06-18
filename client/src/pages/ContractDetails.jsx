@@ -17,6 +17,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getContractById } from '../services/api';
 import GraphVisualizer from '../components/GraphVisualizer';
 import { RiskScoreBadge, MarketStatusBadge } from '../components/RiskBadge';
+import CopyButton from '../components/CopyButton';
 import { 
   FileText, 
   ShieldAlert, 
@@ -206,7 +207,8 @@ const ContractDetails = () => {
                     </div>
 
                     {/* Verbatim Clause Text */}
-                    <div className="bg-navy-950/50 border border-navy-850/80 rounded-lg p-3 text-[10px] font-mono text-slate-300 leading-relaxed max-h-48 overflow-y-auto">
+                    <div className="relative group bg-navy-950/50 border border-navy-850/80 rounded-lg p-3 text-[10px] font-mono text-slate-300 leading-relaxed max-h-48 overflow-y-auto">
+                      <CopyButton text={clause.clauseText} />
                       "{clause.clauseText}"
                     </div>
 

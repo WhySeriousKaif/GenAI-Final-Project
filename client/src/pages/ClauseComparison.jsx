@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from 'react';
 import { getContracts, getContractById } from '../services/api';
 import { RiskScoreBadge } from '../components/RiskBadge';
+import CopyButton from '../components/CopyButton';
 import { Layers, FileText, Check, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -246,9 +247,12 @@ const ClauseComparison = () => {
                             <span className="text-[10px] text-slate-500 font-semibold">{clause.sectionNumber}</span>
                             <RiskScoreBadge score={clause.riskScore} />
                           </div>
-                          <p className="text-slate-300 line-clamp-4 leading-relaxed hover:line-clamp-none transition-all duration-200 cursor-pointer" title="Click to expand">
-                            "{clause.clauseText}"
-                          </p>
+                          <div className="relative group">
+                            <CopyButton text={clause.clauseText} />
+                            <p className="text-slate-300 line-clamp-4 leading-relaxed hover:line-clamp-none transition-all duration-200 cursor-pointer" title="Click to expand">
+                              "{clause.clauseText}"
+                            </p>
+                          </div>
                           <div className="bg-navy-950/40 border border-navy-850 p-2 rounded-lg space-y-1">
                             <span className="text-[9px] text-blue-500 font-bold uppercase tracking-wider block">Assessment</span>
                             <p className="text-[10px] text-slate-400 leading-normal">{clause.reason}</p>
