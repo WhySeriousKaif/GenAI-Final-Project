@@ -24,8 +24,9 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Handle standard errors
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  // Prefer an explicit status from AppError / ExtractionError; otherwise fall
+  // back to any status already set on the response, else 500.
+  const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   return res.status(statusCode).json({
     success: false,
     message: err.message || 'An unexpected error occurred on the server.',

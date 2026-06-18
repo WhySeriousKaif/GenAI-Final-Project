@@ -1,7 +1,14 @@
 // =========================================================================
 // System Admin Panel Component
 // =========================================================================
-import React, { useEffect, useState } from 'react';
+// This page provides controls to inspect the system health and prepare
+// the database for fresh demonstrations.
+//
+// Displays:
+// 1. Connection states of MongoDB, Gemini API, and Neo4j.
+// 2. Database Reset Action (wipes MongoDB collections and deletes Neo4j nodes).
+
+import { useEffect, useState } from 'react';
 import { getSystemStatus, resetDatabase } from '../services/api';
 import { Settings, ShieldCheck, Database, RefreshCw, ShieldAlert } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
@@ -13,22 +20,31 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState('');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  useEffect(() => { fetchStatus(); }, []);
-
   const fetchStatus = async () => {
     try {
       setLoading(true);
       const res = await getSystemStatus();
-      if (res.success) setStatus(res.services);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+      if (res.success) {
+        setStatus(res.services);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchStatus();
+  }, []);
 
   const executeResetDB = async () => {
     setIsConfirmOpen(false);
     try {
       setResetting(true);
       setMessage('Purging database clusters...');
+      
       const res = await resetDatabase();
       if (res.success) { setMessage(res.message); fetchStatus(); }
     } catch (err) { console.error(err); setMessage('Failed to complete system purge.'); }
@@ -109,6 +125,7 @@ const AdminDashboard = () => {
             }
           </div>
         </div>
+
       </div>
 
       {/* Danger Zone */}

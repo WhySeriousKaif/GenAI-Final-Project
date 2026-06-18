@@ -89,6 +89,25 @@ const ExecutiveSummarySchema = new mongoose.Schema({
   }
 });
 
+// 2b. EMBEDDING CACHE SCHEMA (Subdocument)
+// Stores precomputed online (Gemini) embeddings for the contract's text chunks so
+// the RAG chat does not have to re-embed the entire document on every question.
+// Only the ONLINE embedding path is cached; offline TF-IDF stays compute-on-demand.
+const EmbeddingChunkSchema = new mongoose.Schema({
+  index: { type: Number, required: true },   // chunk order in the document
+  text: { type: String, required: true },    // the chunk text (returned as RAG context)
+  vector: { type: [Number], required: true } // the embedding vector
+}, { _id: false });
+
+const EmbeddingSchema = new mongoose.Schema({
+  model: { type: String },          // e.g. 'text-embedding-004' — guards against mixing vector spaces
+  dimension: { type: Number },      // vector length, for sanity checks
+  chunkSize: { type: Number },      // chunking params captured so retrieval matches generation
+  chunkOverlap: { type: Number },
+  generatedAt: { type: Date },
+  chunks: { type: [EmbeddingChunkSchema], default: [] }
+}, { _id: false });
+
 // 3. CONTRACT SCHEMA (Main Document)
 // The root database record representing a full contract.
 const ContractSchema = new mongoose.Schema({
@@ -118,6 +137,14 @@ const ContractSchema = new mongoose.Schema({
   overallRiskScore: {
     type: Number,
     default: 0
+  },
+  // Cached online embeddings for RAG chat. Marked `select: false` so the large
+  // vector arrays are NEVER returned to list/detail endpoints or the frontend;
+  // the RAG service explicitly opts in with `.select('+embeddings')`.
+  embeddings: {
+    type: EmbeddingSchema,
+    select: false,
+    default: undefined
   }
 });
 

@@ -7,10 +7,11 @@
 // in every component, making deployment configurations easier.
 
 import axios from 'axios';
+import { TOKEN_KEY, API_BASE_URL } from '../config/constants';
 
 // Create a configured Axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -19,7 +20,7 @@ const apiClient = axios.create({
 // Request interceptor to automatically attach JWT token on all outgoing calls
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('lexicore_token');
+    const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,6 +28,26 @@ apiClient.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+// Response interceptor: on an expired/invalid session (401), clear the stale
+// token centrally so the auth context + route guards redirect to login. This
+// removes ad-hoc 401 handling from individual components.
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * Normalizes an Axios error into a user-facing message. Centralizes the
+ * repeated `err.response?.data?.message || 'fallback'` pattern.
+ */
+export const getApiErrorMessage = (error, fallback = 'Something went wrong. Please try again.') =>
+  error?.response?.data?.message || error?.message || fallback;
 
 /**
  * 1. CONTRACTS ENDPOINTS

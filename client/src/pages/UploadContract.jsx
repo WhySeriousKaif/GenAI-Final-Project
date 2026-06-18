@@ -9,10 +9,10 @@
 //   is executing (e.g. text extraction, Gemini analysis, Graph DB indexing).
 // - Quick instruction guides on how to test with our pre-generated sample PDFs.
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadContract } from '../services/api';
-import { UploadCloud, File, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
+import { UploadCloud, File, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 const UploadContract = () => {
   const [file, setFile] = useState(null);

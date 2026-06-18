@@ -11,8 +11,8 @@
 // - Cross-references (REFERENCES): Colored arc/lines pointing from one Clause to another.
 // - Interactive: Clicking a clause node triggers a highlight callback on the parent page.
 
-import React, { useState } from 'react';
-import { HelpCircle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+
 
 const GraphVisualizer = ({ graphData, onNodeClick }) => {
   const [hoveredNode, setHoveredNode] = useState(null);

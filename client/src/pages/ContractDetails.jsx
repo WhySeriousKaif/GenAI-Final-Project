@@ -1,7 +1,18 @@
 // =========================================================================
 // Contract Details Workspace Page Component
 // =========================================================================
-import React, { useEffect, useState, useRef } from 'react';
+// This is the core analytical center for a single document.
+// It retrieves the contract details from the database and maps them into three tabs:
+// 1. RISK ANALYSIS: Detailed breakdowns of the 7 extracted legal clauses.
+// 2. EXECUTIVE SUMMARY: A plain-English commercial summary.
+// 3. CLAUSE GRAPH: SVG network map showing references and contains paths.
+//
+// Additional features:
+// - Navigation links to launch the AI RAG chat console.
+// - Expandable panel to inspect raw text extracted from PDF/DOCX.
+// - Interactive node highlight link from the graph to scroll directly to details.
+
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getContractById } from '../services/api';
 import GraphVisualizer from '../components/GraphVisualizer';
@@ -19,9 +30,7 @@ import {
   Activity, 
   Layers, 
   ChevronRight,
-  TrendingUp,
-  Scale,
-  CheckCircle2
+  Scale
 } from 'lucide-react';
 
 const ContractDetails = () => {
@@ -129,7 +138,7 @@ const ContractDetails = () => {
                 // Assign consistent analyst based on clause index
                 const analystIndex = idx % contributors.length;
                 const assignedAnalyst = contributors[analystIndex];
-                
+
                 return (
                   <div key={clause._id || idx} ref={el => clauseRefs.current[clause.clauseType] = el}
                     className={`glass-card p-5 space-y-3 transition-all duration-300 ${isHighlighted ? 'border-primary/60 bg-primary/5 shadow-md scale-[1.01]' : ''}`}>
@@ -144,11 +153,13 @@ const ContractDetails = () => {
                         <RiskScoreBadge score={clause.riskScore} />
                       </div>
                     </div>
+
                     {/* Verbatim Clause Text */}
                     <div className="relative group bg-canvas border border-hairline rounded-lg p-3 text-xs font-mono text-body leading-relaxed max-h-48 overflow-y-auto">
                       <CopyButton text={clause.clauseText} />
                       "{clause.clauseText}"
                     </div>
+                    {/* AI Assessment Commentary */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div className="bg-canvas border border-hairline rounded-lg p-3 space-y-0.5">
                         <span className="text-xs font-bold text-muted uppercase tracking-wider block">Risk Justification</span>
@@ -179,8 +190,11 @@ const ContractDetails = () => {
           {/* TAB 2: EXECUTIVE SUMMARY */}
           {activeTab === 'summary' && (
             <div className="space-y-4">
+
               {/* Main Summary Blocks */}
               <div className="glass-card p-5 md:p-6 space-y-4">
+                
+                {/* Purpose Block */}
                 <div className="space-y-1">
                   <h3 className="text-base font-semibold text-primary flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Commercial Purpose</h3>
                   <p className="text-sm text-body leading-relaxed pl-5">{summary.purpose}</p>
@@ -203,6 +217,7 @@ const ContractDetails = () => {
                     {summary.topRisks?.map((risk, idx) => <li key={idx} className="text-xs text-body flex items-start gap-1.5 leading-relaxed"><ChevronRight className="h-3.5 w-3.5 text-error flex-shrink-0 mt-0.5" />{risk}</li>)}
                   </ul>
                 </div>
+
               </div>
               <div className="glass-card p-5 border-l-4 border-l-primary bg-primary/5 space-y-3">
                 <h3 className="text-base font-semibold text-primary flex items-center gap-1.5 uppercase tracking-wide"><Scale className="h-4 w-4" /> Top 3 Negotiation Recommendations</h3>
@@ -215,6 +230,7 @@ const ContractDetails = () => {
                   ))}
                 </ol>
               </div>
+
             </div>
           )}
 
@@ -249,7 +265,7 @@ const ContractDetails = () => {
               </div>
               <h3 className="text-sm font-semibold text-ink">Analysis History</h3>
             </div>
-            
+
             <div className="analysis-timeline">
               {getSampleAnalysisHistory().map((item, idx) => (
                 <div key={idx} className="timeline-step">
@@ -281,8 +297,11 @@ const ContractDetails = () => {
             </div>
             <Link to="/compare" className="btn-secondary w-full py-2 text-sm">Compare Clauses</Link>
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };

@@ -19,7 +19,7 @@
 // The button is positioned absolute (top-right) so it floats neatly over
 // the text container without disrupting the layout flow.
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Copy, Check } from 'lucide-react';
 
 /**
