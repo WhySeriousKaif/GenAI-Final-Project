@@ -3,8 +3,10 @@
 // =========================================================================
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useTheme } from '../context/ThemeContext';
 
 const ClauseFrequencyChart = ({ contracts }) => {
+  const { isDark } = useTheme();
   const frequencies = {
     'Indemnity': 0,
     'Limitation of Liability': 0,
@@ -38,8 +40,12 @@ const ClauseFrequencyChart = ({ contracts }) => {
     );
   }
 
-  // Warm editorial bar colors
-  const COLORS = ['#cc785c', '#d4a017', '#5db872', '#8b7355', '#a9583e', '#6c6a64', '#3d3d3a'];
+  // Dark/Light aware colors
+  const COLORS = isDark 
+    ? ['#3b82f6', '#ff9a2e', '#ffffff', '#10b981', '#9a8df2', '#ec4899', '#f43f5e']
+    : ['#cc785c', '#d4a017', '#5db872', '#8b7355', '#a9583e', '#6c6a64', '#3d3d3a'];
+
+  const labelColor = isDark ? '#80838d' : '#6c6a64';
 
   return (
     <div className="w-full h-64">
@@ -50,25 +56,25 @@ const ClauseFrequencyChart = ({ contracts }) => {
         >
           <XAxis 
             dataKey="name" 
-            tick={{ fill: '#6c6a64', fontSize: 9 }}
+            tick={{ fill: labelColor, fontSize: 9 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis 
-            tick={{ fill: '#6c6a64', fontSize: 9 }} 
+            tick={{ fill: labelColor, fontSize: 9 }} 
             allowDecimals={false}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{ 
-              backgroundColor: '#faf9f5', 
-              borderColor: '#e6dfd8', 
+              backgroundColor: isDark ? '#111216' : '#faf9f5', 
+              borderColor: isDark ? '#1d1f24' : '#e6dfd8', 
               borderRadius: '8px',
-              color: '#141413',
+              color: isDark ? '#ffffff' : '#141413',
               fontSize: '11px'
             }}
-            cursor={{ fill: 'rgba(204, 120, 92, 0.06)' }}
+            cursor={{ fill: isDark ? 'rgba(157, 235, 85, 0.04)' : 'rgba(204, 120, 92, 0.06)' }}
           />
           <Bar dataKey="frequency" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (

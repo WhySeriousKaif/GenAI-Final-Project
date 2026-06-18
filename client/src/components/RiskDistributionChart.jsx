@@ -3,8 +3,10 @@
 // =========================================================================
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useTheme } from '../context/ThemeContext';
 
 const RiskDistributionChart = ({ contracts }) => {
+  const { isDark } = useTheme();
   const counts = {
     Financial: 0,
     Operational: 0,
@@ -35,8 +37,13 @@ const RiskDistributionChart = ({ contracts }) => {
     );
   }
 
-  // Warm editorial palette
-  const COLORS = {
+  // Dark/Light aware palette
+  const COLORS = isDark ? {
+    Financial: '#3b82f6',    // Vibrant Blue (Primary)
+    Operational: '#10b981',  // Emerald Green
+    Legal: '#ff9a2e',        // Neon Orange
+    Reputational: '#9a8df2'  // Soft Purple
+  } : {
     Financial: '#cc785c',    // coral (primary)
     Operational: '#d4a017',  // warm amber
     Legal: '#5db872',        // sage green
@@ -57,15 +64,15 @@ const RiskDistributionChart = ({ contracts }) => {
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#8e8b82'} />
+              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || (isDark ? '#80838d' : '#8e8b82')} />
             ))}
           </Pie>
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: '#faf9f5', 
-              borderColor: '#e6dfd8', 
+              backgroundColor: isDark ? '#111216' : '#faf9f5', 
+              borderColor: isDark ? '#1d1f24' : '#e6dfd8', 
               borderRadius: '8px',
-              color: '#141413',
+              color: isDark ? '#ffffff' : '#141413',
               fontSize: '11px'
             }} 
           />
@@ -73,7 +80,7 @@ const RiskDistributionChart = ({ contracts }) => {
             verticalAlign="bottom" 
             height={36} 
             iconType="circle"
-            formatter={(value) => <span style={{ color: '#6c6a64', fontSize: '11px' }}>{value}</span>}
+            formatter={(value) => <span style={{ color: isDark ? '#80838d' : '#6c6a64', fontSize: '11px' }}>{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>

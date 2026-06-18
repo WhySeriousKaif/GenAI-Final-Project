@@ -41,26 +41,26 @@
    DARK MODE — Overrides via html.dark CSS custom properties
    ========================================================================= */
 html.dark {
-  --color-canvas:               #1a1917;
-  --color-surface-soft:         #201f1c;
-  --color-surface-card:         #252320;
-  --color-surface-cream-strong: #2c2a26;
+  --color-canvas:               #07080a; /* Sleek Pitch Slate Black */
+  --color-surface-soft:         #111216; /* Clean Charcoal Cards */
+  --color-surface-card:         #111216;
+  --color-surface-cream-strong: #1b1c22; /* Active/Hover Card background */
 
-  --color-primary:              #d4896a;
-  --color-primary-active:       #e09a7d;
-  --color-primary-disabled:     #3a3632;
+  --color-primary:              #3b82f6; /* Vibrant Blue Accent */
+  --color-primary-active:       #2563eb;
+  --color-primary-disabled:     #1d1f24;
 
-  --color-ink:                  #f0ede6;
-  --color-body-strong:          #ddd9d0;
-  --color-body:                 #c4bfb5;
-  --color-muted:                #8a8680;
-  --color-muted-soft:           #6b6761;
-  --color-hairline:             #2e2c28;
-  --color-hairline-soft:        #363330;
+  --color-ink:                  #ffffff; /* Strong white text */
+  --color-body-strong:          #e4e5e9;
+  --color-body:                 #babbc2; /* Clear secondary text */
+  --color-muted:                #80838d; /* Muted slate gray text */
+  --color-muted-soft:           #4c4f59;
+  --color-hairline:             #1d1f24; /* Clean borders outlining cards */
+  --color-hairline-soft:        #15161a;
 
-  --color-success:              #6dcc82;
-  --color-warning:              #e0b030;
-  --color-error:                #d95f5f;
+  --color-success:              #10b981; /* Emerald Green */
+  --color-warning:              #ff9a2e; /* Neon Orange Accent */
+  --color-error:                #fa5252;
 }
 
 @layer base {

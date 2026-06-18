@@ -68,10 +68,10 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
     <div className="glass-card p-6 relative">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-ink flex items-center gap-2">
             Clause Relationship Graph
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted">
             Visualizes clauses containing cross-references (REFERENCES) to other clauses.
           </p>
         </div>
@@ -79,7 +79,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
             isConnected 
               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+              : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
             {isConnected ? 'Neo4j Active' : 'MongoDB Graph Helper'}
           </span>
@@ -87,7 +87,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
       </div>
 
       {/* SVG Canvas */}
-      <div className="relative flex justify-center bg-navy-950/60 rounded-xl overflow-hidden border border-navy-800">
+      <div className="relative flex justify-center bg-canvas rounded-xl overflow-hidden border border-hairline">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-2xl h-96 select-none">
           {/* Define Arrowheads for references */}
           <defs>
@@ -144,7 +144,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
                   y1={start.y}
                   x2={end.x}
                   y2={end.y}
-                  stroke="#475569"
+                  stroke="var(--color-muted)"
                   strokeWidth="1.5"
                   strokeDasharray="5 5"
                   className="opacity-40"
@@ -183,7 +183,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
                 {/* Main Node Circle */}
                 <circle
                   r={size}
-                  fill={isContract ? '#1e293b' : nodeColor}
+                  fill={isContract ? 'var(--color-surface-soft)' : nodeColor}
                   stroke={nodeColor}
                   strokeWidth="2.5"
                   className="transition-transform duration-200"
@@ -193,7 +193,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
                 <text
                   y={size + 15}
                   textAnchor="middle"
-                  fill={isHovered ? '#f8fafc' : '#94a3b8'}
+                  fill={isHovered ? 'var(--color-ink)' : 'var(--color-muted)'}
                   fontSize={isContract ? 11 : 9}
                   fontWeight={isContract ? 'bold' : 'normal'}
                   className="pointer-events-none select-none transition-colors"
@@ -217,7 +217,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
 
         {/* Hover Details Panel Overlay */}
         {hoveredNode && (
-          <div className="absolute bottom-4 left-4 right-4 bg-slate-900/90 border border-slate-700/60 rounded-lg p-2.5 backdrop-blur-sm transition-all">
+          <div className="absolute bottom-4 left-4 right-4 bg-surface-soft/90 border border-hairline rounded-lg p-2.5 backdrop-blur-sm transition-all">
             {(() => {
               const node = nodes.find(n => n.id === hoveredNode);
               if (!node) return null;
@@ -225,19 +225,19 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
                 return (
                   <div>
                     <span className="text-xs text-amber-500 font-bold">Document Center</span>
-                    <h4 className="text-sm font-semibold text-slate-100">{node.label}</h4>
+                    <h4 className="text-sm font-semibold text-ink">{node.label}</h4>
                   </div>
                 );
               } else {
                 return (
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-xs text-slate-400">Clause Node ({node.clauseType})</span>
-                      <h4 className="text-sm font-semibold text-slate-200">
+                      <span className="text-xs text-muted">Clause Node ({node.clauseType})</span>
+                      <h4 className="text-sm font-semibold text-ink">
                         Risk Score: <span className={Number(node.riskScore) > 70 ? 'text-rose-400' : Number(node.riskScore) > 30 ? 'text-amber-400' : 'text-emerald-400'}>{node.riskScore}%</span>
                       </h4>
                     </div>
-                    <span className="text-[10px] text-slate-500 italic">Click to jump to clause details</span>
+                    <span className="text-[10px] text-muted italic">Click to jump to clause details</span>
                   </div>
                 );
               }
@@ -247,7 +247,7 @@ const GraphVisualizer = ({ graphData, onNodeClick }) => {
       </div>
 
       {/* Legend Block */}
-      <div className="flex flex-wrap gap-4 items-center justify-center mt-4 text-xs text-slate-400 border-t border-navy-800/80 pt-4">
+      <div className="flex flex-wrap gap-4 items-center justify-center mt-4 text-xs text-muted border-t border-hairline pt-4">
         <span className="flex items-center gap-1.5">
           <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 opacity-20 border border-emerald-500"></span>
           Low Risk (&lt;=30%)
