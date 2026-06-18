@@ -30,9 +30,7 @@ import {
   Activity, 
   Layers, 
   ChevronRight,
-  TrendingUp,
-  Scale,
-  CheckCircle2
+  Scale
 } from 'lucide-react';
 
 const ContractDetails = () => {

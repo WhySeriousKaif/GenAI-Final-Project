@@ -5,9 +5,8 @@
 // It features a premium, semi-translucent glass effect with responsive links
 // and clear active-route styling using React Router.
 
-import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShieldAlert, LayoutDashboard, UploadCloud, FileText, Settings, MessageSquare, LogOut, User as UserIcon, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, UploadCloud, FileText, Settings, MessageSquare, LogOut, User as UserIcon, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { getTopContributors } from '../data/contributorsMock';
@@ -51,7 +50,7 @@ const Navbar = () => {
           
           {/* Brand Logo & Name */}
           <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-            <div className="p-1.5 bg-gradient-to-br from-primary to-primary-active rounded-xl shadow-sm group-hover:scale-105 transition-transform duration-200">
+            <div className="p-1.5 bg-linear-to-br from-primary to-primary-active rounded-xl shadow-sm group-hover:scale-105 transition-transform duration-200">
               <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#nav-shield-gradient)" />
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -113,7 +112,7 @@ const Navbar = () => {
                   {getTopContributors().map((contributor) => (
                     <div
                       key={contributor.id}
-                      className={`contributor-badge w-7 h-7 bg-gradient-to-br ${contributor.avatarColor}`}
+                      className={`contributor-badge w-7 h-7 bg-linear-to-br ${contributor.avatarColor}`}
                       title={contributor.name}
                     >
                       {contributor.initials}

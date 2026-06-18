@@ -14,7 +14,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getContracts, getContractById, chatWithContract } from '../services/api';
-import { MessageSquare, ArrowLeft, Send, Sparkles } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Send } from 'lucide-react';
 
 const ContractChat = () => {
   const { id } = useParams();
@@ -43,11 +43,6 @@ const ContractChat = () => {
     };
     loadContracts();
   }, []);
-
-  useEffect(() => {
-    if (id) { loadActiveContract(id); }
-    else { setSelectedContract(null); setMessages([]); setActiveContext(''); }
-  }, [id, contractsList]);
 
   const loadActiveContract = async (contractId) => {
     try {

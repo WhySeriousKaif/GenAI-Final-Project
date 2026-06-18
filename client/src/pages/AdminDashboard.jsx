@@ -1,7 +1,6 @@
 // =========================================================================
 // System Admin Panel Component
 // =========================================================================
-import React, { useEffect, useState } from 'react';
 // This page provides controls to inspect the system health and prepare
 // the database for fresh demonstrations.
 //
@@ -39,10 +38,6 @@ const AdminDashboard = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchStatus();
   }, []);
-
-  const handleResetDB = () => {
-    setIsConfirmOpen(true);
-  };
 
   const executeResetDB = async () => {
     setIsConfirmOpen(false);

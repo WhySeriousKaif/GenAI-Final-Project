@@ -27,8 +27,6 @@ const ClauseComparison = () => {
   const clauseTypes = ['Payment Terms', 'Termination', 'Limitation of Liability', 'Indemnity', 'IP Ownership', 'Governing Law', 'Confidentiality'];
   const [selectedClauses, setSelectedClauses] = useState(['Payment Terms', 'Termination', 'Limitation of Liability']);
 
-  useEffect(() => { fetchContractsList(); }, []);
-
   const fetchContractsList = async () => {
     try {
       setLoadingList(true);
@@ -51,7 +49,6 @@ const ClauseComparison = () => {
         : [...prev, id]
     );
   };
-  const handleToggleContract = (id) => setSelectedContractIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   const handleToggleClause = (type) => setSelectedClauses(prev => prev.includes(type) ? prev.filter(i => i !== type) : [...prev, type]);
 
   const handleCompareSubmit = async () => {
