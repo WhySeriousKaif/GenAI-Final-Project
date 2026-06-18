@@ -44,10 +44,10 @@ const RiskDistributionChart = ({ contracts }) => {
     Legal: '#ff9a2e',        // Neon Orange
     Reputational: '#9a8df2'  // Soft Purple
   } : {
-    Financial: '#cc785c',    // coral (primary)
-    Operational: '#d4a017',  // warm amber
-    Legal: '#5db872',        // sage green
-    Reputational: '#8b7355'  // warm brown
+    Financial: '#2563eb',    // Vibrant Blue
+    Operational: '#16a34a',  // High-Contrast Green
+    Legal: '#ea580c',        // High-Contrast Orange
+    Reputational: '#7c3aed'  // High-Contrast Purple
   };
 
   return (

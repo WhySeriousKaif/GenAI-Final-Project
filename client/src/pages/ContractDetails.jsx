@@ -55,11 +55,11 @@ const ContractDetails = () => {
     }, 100);
   };
 
-  if (loading) return <div className="max-w-7xl mx-auto px-4 py-32 flex items-center justify-center text-muted text-sm">Loading LexiCore contract analysis...</div>;
+  if (loading) return <div className="max-w-[85rem] mx-auto px-4 py-32 flex items-center justify-center text-muted text-base">Loading LexiCore contract analysis...</div>;
   if (error || !contract) return (
-    <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
-      <h2 className="text-xl font-serif text-error font-medium">Error Loading Contract</h2>
-      <p className="text-muted text-sm">{error || 'Contract record could not be found.'}</p>
+    <div className="max-w-[85rem] mx-auto px-4 py-16 text-center space-y-4">
+      <h2 className="text-2xl font-serif text-error font-medium">Error Loading Contract</h2>
+      <p className="text-muted text-base">{error || 'Contract record could not be found.'}</p>
       <Link to="/" className="btn-secondary py-2 px-4 inline-flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Dashboard</Link>
     </div>
   );
@@ -69,24 +69,24 @@ const ContractDetails = () => {
   const summary = contract.summary || {};
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5 bg-canvas text-body font-sans">
-      <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-semibold text-muted hover:text-ink transition-colors uppercase tracking-wider">
+    <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5 bg-canvas text-body font-sans">
+      <Link to="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-ink transition-colors uppercase tracking-wider">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to Dashboard
       </Link>
 
       {/* Contract Title Banner */}
-      <div className="glass-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <div className="p-2.5 bg-primary rounded-xl shadow-sm text-white mt-0.5"><FileText className="h-5 w-5" /></div>
+          <div className="p-3 bg-primary rounded-xl shadow-sm text-white mt-0.5"><FileText className="h-5 w-5" /></div>
           <div>
-            <h1 className="text-xl font-serif text-ink leading-tight font-medium">{contract.title}</h1>
-            <p className="text-[10px] text-muted mt-0.5">Ingested on {new Date(contract.uploadedAt).toLocaleDateString()} at {new Date(contract.uploadedAt).toLocaleTimeString()}</p>
+            <h1 className="text-2xl font-serif text-ink leading-tight font-medium">{contract.title}</h1>
+            <p className="text-xs text-muted mt-0.5">Ingested on {new Date(contract.uploadedAt).toLocaleDateString()} at {new Date(contract.uploadedAt).toLocaleTimeString()}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 border-l border-hairline pl-0 md:pl-5">
           <div className="text-right">
-            <span className="block text-[9px] text-muted font-bold uppercase tracking-wider">Overall Risk Score</span>
-            <span className="block text-xl font-serif text-ink mt-0.5">{overallScore}%</span>
+            <span className="block text-xs text-muted font-bold uppercase tracking-wider">Overall Risk Score</span>
+            <span className="block text-2xl font-serif text-ink mt-0.5">{overallScore}%</span>
           </div>
           <RiskScoreBadge score={overallScore} />
         </div>
@@ -95,7 +95,7 @@ const ContractDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 space-y-4">
           {/* Tab Selector */}
-          <div className="flex items-center justify-between border-b border-hairline text-xs font-semibold">
+          <div className="flex items-center justify-between border-b border-hairline text-sm font-semibold">
             <div className="flex space-x-5">
               {[
                 ['risks', `Risk Analysis (${clauses.length})`],
@@ -132,39 +132,39 @@ const ContractDetails = () => {
                 
                 return (
                   <div key={clause._id || idx} ref={el => clauseRefs.current[clause.clauseType] = el}
-                    className={`glass-card p-4 space-y-3 transition-all duration-300 ${isHighlighted ? 'border-primary/60 bg-primary/5 shadow-md scale-[1.01]' : ''}`}>
+                    className={`glass-card p-5 space-y-3 transition-all duration-300 ${isHighlighted ? 'border-primary/60 bg-primary/5 shadow-md scale-[1.01]' : ''}`}>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-ink uppercase tracking-wide">{clause.clauseType}</span>
-                        <span className="text-[10px] text-muted">({clause.sectionNumber})</span>
+                        <span className="text-sm font-semibold text-ink uppercase tracking-wide">{clause.clauseType}</span>
+                        <span className="text-xs text-muted">({clause.sectionNumber})</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-canvas text-muted rounded border border-hairline">{clause.riskType} Risk</span>
+                        <span className="text-xs font-semibold px-1.5 py-0.5 bg-canvas text-muted rounded border border-hairline">{clause.riskType} Risk</span>
                         <MarketStatusBadge status={clause.marketStandardStatus} />
                         <RiskScoreBadge score={clause.riskScore} />
                       </div>
                     </div>
                     {/* Verbatim Clause Text */}
-                    <div className="relative group bg-canvas border border-hairline rounded-lg p-3 text-[10px] font-mono text-body leading-relaxed max-h-48 overflow-y-auto">
+                    <div className="relative group bg-canvas border border-hairline rounded-lg p-3 text-xs font-mono text-body leading-relaxed max-h-48 overflow-y-auto">
                       <CopyButton text={clause.clauseText} />
                       "{clause.clauseText}"
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div className="bg-canvas border border-hairline rounded-lg p-3 space-y-0.5">
-                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider block">Risk Justification</span>
-                        <p className="text-body leading-normal text-[11px]">{clause.reason}</p>
+                        <span className="text-xs font-bold text-muted uppercase tracking-wider block">Risk Justification</span>
+                        <p className="text-body leading-normal text-xs">{clause.reason}</p>
                       </div>
                       <div className="bg-canvas border border-hairline rounded-lg p-3 space-y-0.5">
-                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider block">Market Comparison</span>
-                        <p className="text-body leading-normal text-[11px]">{clause.marketComparisonReason || 'This clause aligns with average standards and presents no atypical deviations.'}</p>
+                        <span className="text-xs font-bold text-muted uppercase tracking-wider block">Market Comparison</span>
+                        <p className="text-body leading-normal text-xs">{clause.marketComparisonReason || 'This clause aligns with average standards and presents no atypical deviations.'}</p>
                       </div>
                     </div>
 
                     {/* Analyst Attribution Footer */}
                     <div className="pt-2 border-t border-hairline flex items-center justify-between">
-                      <span className="text-[9px] text-muted">Analyzed on {new Date().toLocaleDateString()}</span>
+                      <span className="text-xs text-muted">Analyzed on {new Date().toLocaleDateString()}</span>
                       <div className="analyst-stamp bg-canvas border border-hairline">
-                        <div className={`contributor-badge w-5 h-5 bg-gradient-to-br ${assignedAnalyst.avatarColor}`}>
+                        <div className={`contributor-badge w-6 h-6 bg-gradient-to-br ${assignedAnalyst.avatarColor}`}>
                           {assignedAnalyst.initials}
                         </div>
                         <span className="text-muted">{assignedAnalyst.name}</span>
@@ -180,36 +180,36 @@ const ContractDetails = () => {
           {activeTab === 'summary' && (
             <div className="space-y-4">
               {/* Main Summary Blocks */}
-              <div className="glass-card p-4 md:p-5 space-y-4">
+              <div className="glass-card p-5 md:p-6 space-y-4">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Commercial Purpose</h3>
-                  <p className="text-xs text-body leading-relaxed pl-5">{summary.purpose}</p>
+                  <h3 className="text-base font-semibold text-primary flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Commercial Purpose</h3>
+                  <p className="text-sm text-body leading-relaxed pl-5">{summary.purpose}</p>
                 </div>
                 <div className="space-y-1.5 border-t border-hairline pt-4">
-                  <h3 className="text-sm font-semibold text-ink flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> Signing Parties</h3>
+                  <h3 className="text-base font-semibold text-ink flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> Signing Parties</h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-5">
-                    {summary.parties?.map((party, idx) => <li key={idx} className="text-[11px] text-body bg-canvas p-2 rounded border border-hairline font-medium">{party}</li>)}
+                    {summary.parties?.map((party, idx) => <li key={idx} className="text-xs text-body bg-canvas p-2 rounded border border-hairline font-medium">{party}</li>)}
                   </ul>
                 </div>
                 <div className="space-y-2 border-t border-hairline pt-4">
-                  <h3 className="text-sm font-semibold text-ink flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-success" /> Key Obligations & Deliverables</h3>
+                  <h3 className="text-base font-semibold text-ink flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-success" /> Key Obligations & Deliverables</h3>
                   <ul className="space-y-1.5 pl-5">
-                    {summary.keyObligations?.map((obl, idx) => <li key={idx} className="text-[11px] text-body flex items-start gap-1.5 leading-relaxed"><ChevronRight className="h-3.5 w-3.5 text-success flex-shrink-0 mt-0.5" />{obl}</li>)}
+                    {summary.keyObligations?.map((obl, idx) => <li key={idx} className="text-xs text-body flex items-start gap-1.5 leading-relaxed"><ChevronRight className="h-3.5 w-3.5 text-success flex-shrink-0 mt-0.5" />{obl}</li>)}
                   </ul>
                 </div>
                 <div className="space-y-2 border-t border-hairline pt-4">
-                  <h3 className="text-sm font-semibold text-ink flex items-center gap-1.5"><ShieldAlert className="h-3.5 w-3.5 text-error" /> Primary Risks Detected</h3>
+                  <h3 className="text-base font-semibold text-ink flex items-center gap-1.5"><ShieldAlert className="h-3.5 w-3.5 text-error" /> Primary Risks Detected</h3>
                   <ul className="space-y-1.5 pl-5">
-                    {summary.topRisks?.map((risk, idx) => <li key={idx} className="text-[11px] text-body flex items-start gap-1.5 leading-relaxed"><ChevronRight className="h-3.5 w-3.5 text-error flex-shrink-0 mt-0.5" />{risk}</li>)}
+                    {summary.topRisks?.map((risk, idx) => <li key={idx} className="text-xs text-body flex items-start gap-1.5 leading-relaxed"><ChevronRight className="h-3.5 w-3.5 text-error flex-shrink-0 mt-0.5" />{risk}</li>)}
                   </ul>
                 </div>
               </div>
-              <div className="glass-card p-4 border-l-4 border-l-primary bg-primary/5 space-y-3">
-                <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5 uppercase tracking-wide"><Scale className="h-4 w-4" /> Top 3 Negotiation Recommendations</h3>
+              <div className="glass-card p-5 border-l-4 border-l-primary bg-primary/5 space-y-3">
+                <h3 className="text-base font-semibold text-primary flex items-center gap-1.5 uppercase tracking-wide"><Scale className="h-4 w-4" /> Top 3 Negotiation Recommendations</h3>
                 <ol className="space-y-2 pl-1">
                   {summary.negotiationPoints?.map((point, idx) => (
-                    <li key={idx} className="text-[11px] text-body flex items-start gap-2.5 leading-relaxed">
-                      <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary/10 text-primary font-bold border border-primary/20 text-[9px] flex-shrink-0 mt-0.5">{idx + 1}</span>
+                    <li key={idx} className="text-xs text-body flex items-start gap-2.5 leading-relaxed">
+                      <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary/10 text-primary font-bold border border-primary/20 text-xs flex-shrink-0 mt-0.5">{idx + 1}</span>
                       {point}
                     </li>
                   ))}
@@ -224,10 +224,10 @@ const ContractDetails = () => {
           {/* Raw Text Toggle */}
           <div className="glass-card p-4">
             <button onClick={() => setShowRawText(!showRawText)} className="flex justify-between items-center w-full text-left">
-              <h3 className="text-xs font-semibold text-ink uppercase tracking-wider">View Raw Extracted Text</h3>
-              <span className="text-[10px] text-primary hover:text-primary-active font-semibold uppercase tracking-wider">{showRawText ? 'Hide Text' : 'Show Text'}</span>
+              <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">View Raw Extracted Text</h3>
+              <span className="text-xs text-primary hover:text-primary-active font-semibold uppercase tracking-wider">{showRawText ? 'Hide Text' : 'Show Text'}</span>
             </button>
-            {showRawText && <div className="mt-3 bg-canvas border border-hairline rounded-lg p-3 text-[10px] font-mono text-body leading-relaxed max-h-80 overflow-y-auto whitespace-pre-wrap">{contract.rawText}</div>}
+            {showRawText && <div className="mt-3 bg-canvas border border-hairline rounded-lg p-3 text-xs font-mono text-body leading-relaxed max-h-80 overflow-y-auto whitespace-pre-wrap">{contract.rawText}</div>}
           </div>
         </div>
 
@@ -236,10 +236,10 @@ const ContractDetails = () => {
           <div className="glass-card p-4 bg-primary/5 border border-primary/20 space-y-3">
             <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20 w-fit"><MessageSquare className="h-5 w-5" /></div>
             <div className="space-y-1">
-              <h3 className="text-xs font-semibold text-ink">Interactive Contract Chat</h3>
-              <p className="text-[11px] text-muted leading-normal">Ask specific questions about this contract terms, liabilities, or IP clauses. Powered by in-memory RAG vector search.</p>
+              <h3 className="text-sm font-semibold text-ink">Interactive Contract Chat</h3>
+              <p className="text-xs text-muted leading-normal">Ask specific questions about this contract terms, liabilities, or IP clauses. Powered by in-memory RAG vector search.</p>
             </div>
-            <Link to={`/chat/${contract._id}`} className="btn-primary w-full py-2 text-xs">Start AI Chat Console</Link>
+            <Link to={`/chat/${contract._id}`} className="btn-primary w-full py-2 text-sm">Start AI Chat Console</Link>
           </div>
           {/* Analysis Timeline Card */}
           <div className="glass-card p-4 space-y-3">
@@ -247,7 +247,7 @@ const ContractDetails = () => {
               <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20">
                 <Activity className="h-4 w-4" />
               </div>
-              <h3 className="text-xs font-semibold text-ink">Analysis History</h3>
+              <h3 className="text-sm font-semibold text-ink">Analysis History</h3>
             </div>
             
             <div className="analysis-timeline">
@@ -260,7 +260,7 @@ const ContractDetails = () => {
                     <div className="timeline-content-label text-ink">
                       {item.action}
                     </div>
-                    <div className="text-[9px] text-muted font-medium">
+                    <div className="text-xs text-muted font-medium">
                       {item.analyst.name}
                     </div>
                     <div className="timeline-content-time text-muted">
@@ -276,10 +276,10 @@ const ContractDetails = () => {
           <div className="glass-card p-4 space-y-3">
             <div className="p-2 bg-canvas text-primary rounded-xl border border-hairline w-fit"><Layers className="h-5 w-5" /></div>
             <div className="space-y-1">
-              <h3 className="text-xs font-semibold text-ink">Batch Compare</h3>
-              <p className="text-[11px] text-muted leading-normal">Compare multiple uploaded documents side-by-side inside a grid table to flag variances in payment terms, liability caps, and termination.</p>
+              <h3 className="text-sm font-semibold text-ink">Batch Compare</h3>
+              <p className="text-xs text-muted leading-normal">Compare multiple uploaded documents side-by-side inside a grid table to flag variances in payment terms, liability caps, and termination.</p>
             </div>
-            <Link to="/compare" className="btn-secondary w-full py-2 text-xs">Compare Clauses</Link>
+            <Link to="/compare" className="btn-secondary w-full py-2 text-sm">Compare Clauses</Link>
           </div>
         </div>
       </div>

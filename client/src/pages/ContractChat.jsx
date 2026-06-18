@@ -74,66 +74,66 @@ const ContractChat = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-canvas text-body font-sans">
-      <Link to="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-ink transition-colors uppercase tracking-widest mb-6">
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to Dashboard
+    <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-canvas text-body font-sans">
+      <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-ink transition-colors uppercase tracking-widest mb-8">
+        <ArrowLeft className="h-4 w-4" /> Back to Dashboard
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-200px)] min-h-[550px]">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-170px)] min-h-[680px]">
         
         {/* SIDEBAR: Contract Selection */}
-        <div className="glass-card p-4 flex flex-col gap-4 overflow-hidden h-full">
+        <div className="glass-card p-5 flex flex-col gap-4 overflow-hidden h-full">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-ink">Select Contract</h3>
-            <p className="text-[10px] text-muted mt-1">Choose a loaded contract to index into active memory.</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-ink">Select Contract</h3>
+            <p className="text-xs text-muted mt-1">Choose a loaded contract to index into active memory.</p>
           </div>
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {contractsList.map(c => {
               const isActive = selectedContract?._id === c._id;
               return (
                 <Link key={c._id} to={`/chat/${c._id}`}
-                  className={`block p-3 rounded-xl border text-left transition-all ${isActive ? 'bg-primary/10 border-primary text-ink' : 'bg-canvas border-hairline text-muted hover:border-primary/40 hover:text-ink'}`}>
-                  <p className="text-xs font-semibold truncate">{c.title}</p>
-                  <span className="text-[9px] text-muted block mt-1 uppercase font-medium">Risk Score: {c.overallRiskScore}%</span>
+                  className={`block p-4 rounded-xl border text-left transition-all ${isActive ? 'bg-primary/10 border-primary text-ink' : 'bg-canvas border-hairline text-muted hover:border-primary/40 hover:text-ink'}`}>
+                  <p className="text-sm font-semibold truncate">{c.title}</p>
+                  <span className="text-[11px] text-muted block mt-1 uppercase font-medium">Risk Score: {c.overallRiskScore}%</span>
                 </Link>
               );
             })}
-            {contractsList.length === 0 && <p className="text-xs text-muted italic mt-4 text-center">No contracts available.</p>}
+            {contractsList.length === 0 && <p className="text-sm text-muted italic mt-4 text-center">No contracts available.</p>}
           </div>
         </div>
 
         {/* CHAT DISPLAY & INPUT */}
         <div className="lg:col-span-2 glass-card flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <div className="border-b border-hairline p-4 bg-surface-soft/50 flex items-center justify-between">
+          <div className="border-b border-hairline p-5 bg-surface-soft/50 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              <div className="truncate max-w-[250px]">
-                <h4 className="text-sm font-semibold text-ink truncate">{selectedContract ? selectedContract.title : 'No Contract Indexed'}</h4>
-                <p className="text-[10px] text-muted">{selectedContract ? 'Vector Space Vectorized (RAG Ready)' : 'Select a contract on the left to start'}</p>
+              <MessageSquare className="h-6 w-6 text-primary" />
+              <div className="truncate max-w-[350px]">
+                <h4 className="text-base font-semibold text-ink truncate">{selectedContract ? selectedContract.title : 'No Contract Indexed'}</h4>
+                <p className="text-xs text-muted">{selectedContract ? 'Vector Space Vectorized (RAG Ready)' : 'Select a contract on the left to start'}</p>
               </div>
             </div>
           </div>
 
           {/* Messages History Pane */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-canvas/50">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-canvas/50">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed ${
+                <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${
                   msg.sender === 'user'
                     ? 'bg-primary text-white rounded-tr-none'
                     : 'bg-surface-card text-body border border-hairline rounded-tl-none'
                 }`}>
                   {msg.text}
                 </div>
-                {msg.mode && <span className="text-[8px] text-primary/70 font-bold uppercase tracking-widest mt-1 pl-2">Source: {msg.mode}</span>}
+                {msg.mode && <span className="text-[10px] text-primary/70 font-bold uppercase tracking-widest mt-1 pl-2">Source: {msg.mode}</span>}
               </div>
             ))}
             {loadingAnswer && (
-              <div className="flex items-start gap-1 p-3 bg-surface-card/60 rounded-2xl rounded-tl-none border border-hairline w-fit">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></span>
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]"></span>
+              <div className="flex items-start gap-1.5 p-4 bg-surface-card/60 rounded-2xl rounded-tl-none border border-hairline w-fit">
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce"></span>
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.4s]"></span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -141,10 +141,10 @@ const ContractChat = () => {
 
           {/* Quick-Query Chips */}
           {selectedContract && messages.length > 0 && (
-            <div className="px-4 py-2 border-t border-hairline bg-surface-soft/30 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-2">
+            <div className="px-6 py-3 border-t border-hairline bg-surface-soft/30 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-3">
               {quickQuestions.map((q, i) => (
                 <button key={i} onClick={() => handleSendMessage(q)} disabled={loadingAnswer}
-                  className="bg-canvas hover:bg-surface-card border border-hairline text-[10px] text-body font-semibold px-2.5 py-1 rounded-full flex-shrink-0 transition-colors hover:text-ink">
+                  className="bg-canvas hover:bg-surface-card border border-hairline text-xs text-body font-semibold px-3.5 py-1.5 rounded-full flex-shrink-0 transition-colors hover:text-ink">
                   {q}
                 </button>
               ))}
@@ -152,32 +152,32 @@ const ContractChat = () => {
           )}
 
           {/* Input Panel */}
-          <div className="p-4 border-t border-hairline bg-surface-soft/30">
-            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
+          <div className="p-5 border-t border-hairline bg-surface-soft/30">
+            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-3">
               <input type="text" disabled={!selectedContract || loadingAnswer}
                 placeholder={selectedContract ? "Ask a question about this contract terms..." : "Select a contract first..."}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                className="glass-input flex-1 py-2.5 text-xs disabled:opacity-50"
+                className="glass-input flex-1 py-3 text-sm px-4 disabled:opacity-50"
               />
-              <button type="submit" disabled={!selectedContract || !inputMessage.trim() || loadingAnswer} className="btn-primary p-2.5 rounded-xl disabled:opacity-50">
-                <Send className="h-4 w-4" />
+              <button type="submit" disabled={!selectedContract || !inputMessage.trim() || loadingAnswer} className="btn-primary p-3 rounded-xl disabled:opacity-50">
+                <Send className="h-5 w-5" />
               </button>
             </form>
           </div>
         </div>
 
         {/* RETRIEVED CONTEXT INSPECTOR */}
-        <div className="glass-card p-4 flex flex-col gap-4 overflow-hidden h-full">
+        <div className="glass-card p-5 flex flex-col gap-4 overflow-hidden h-full">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-ink">RAG Context Source</h3>
-            <p className="text-[10px] text-muted mt-1">Paragraphs fetched by Cosine Similarity vector matching.</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-ink">RAG Context Source</h3>
+            <p className="text-xs text-muted mt-1">Paragraphs fetched by Cosine Similarity vector matching.</p>
           </div>
-          <div className="flex-1 overflow-y-auto bg-canvas rounded-xl p-3 border border-hairline text-[10px] font-mono leading-relaxed text-body select-all space-y-4">
+          <div className="flex-1 overflow-y-auto bg-canvas rounded-xl p-4 border border-hairline text-xs font-mono leading-relaxed text-body select-all space-y-4">
             {activeContext ? (
               activeContext.split('\n\n').map((chunk, idx) => (
-                <div key={idx} className="bg-surface-card p-2 border border-hairline rounded-lg">
-                  <span className="text-[8px] text-primary font-bold block mb-1">RETRIEVED BLOCK #{idx + 1}</span>
+                <div key={idx} className="bg-surface-card p-3 border border-hairline rounded-lg">
+                  <span className="text-[10px] text-primary font-bold block mb-1">RETRIEVED BLOCK #{idx + 1}</span>
                   "{chunk}"
                 </div>
               ))

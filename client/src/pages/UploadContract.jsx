@@ -103,16 +103,16 @@ const UploadContract = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="glass-card p-8 space-y-6">
         
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-3xl font-serif text-ink flex items-center justify-center gap-2 font-medium">
+          <h1 className="text-4xl font-serif text-ink flex items-center justify-center gap-2 font-medium">
             <UploadCloud className="h-8 w-8 text-primary" />
             Document Ingestion Portal
           </h1>
-          <p className="text-xs text-muted mt-2">
+          <p className="text-sm text-muted mt-2">
             Upload commercial agreements or contracts for risk scanning.
           </p>
         </div>
@@ -143,10 +143,10 @@ const UploadContract = () => {
             </div>
  
             <div className="text-center">
-              <p className="text-xs font-semibold text-ink">
+              <p className="text-sm font-semibold text-ink">
                 Drag and drop your file here, or <span className="text-primary hover:underline">browse</span>
               </p>
-              <p className="text-[10px] text-muted mt-1">Supports PDF and DOCX agreements (Max 10MB)</p>
+              <p className="text-xs text-muted mt-1">Supports PDF and DOCX agreements (Max 10MB)</p>
             </div>
           </div>
         )}
@@ -160,9 +160,9 @@ const UploadContract = () => {
             </div>
             
             <div className="text-center space-y-2">
-              <h4 className="text-sm font-semibold text-ink">Document Ingestion Pipeline Running</h4>
-              <p className="text-xs text-primary font-semibold uppercase tracking-wider">{pipelineStep}</p>
-              <p className="text-[10px] text-muted italic">This usually takes 3-10 seconds depending on document length.</p>
+              <h4 className="text-base font-semibold text-ink">Document Ingestion Pipeline Running</h4>
+              <p className="text-sm text-primary font-semibold uppercase tracking-wider">{pipelineStep}</p>
+              <p className="text-xs text-muted italic">This usually takes 3-10 seconds depending on document length.</p>
             </div>
           </div>
         )}
@@ -175,8 +175,8 @@ const UploadContract = () => {
                 <File className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-ink truncate max-w-md">{file.name}</p>
-                <p className="text-[10px] text-muted">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p className="text-sm font-semibold text-ink truncate max-w-md">{file.name}</p>
+                <p className="text-xs text-muted">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
               </div>
             </div>
             <button
@@ -193,8 +193,8 @@ const UploadContract = () => {
           <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-error mt-0.5 flex-shrink-0" />
             <div>
-              <h5 className="text-xs font-semibold text-error">Ingestion Error</h5>
-              <p className="text-[10px] text-muted mt-1">{error}</p>
+              <h5 className="text-sm font-semibold text-error">Ingestion Error</h5>
+              <p className="text-xs text-muted mt-1">{error}</p>
             </div>
           </div>
         )}

@@ -43,7 +43,7 @@ const ClauseFrequencyChart = ({ contracts }) => {
   // Dark/Light aware colors
   const COLORS = isDark 
     ? ['#3b82f6', '#ff9a2e', '#ffffff', '#10b981', '#9a8df2', '#ec4899', '#f43f5e']
-    : ['#cc785c', '#d4a017', '#5db872', '#8b7355', '#a9583e', '#6c6a64', '#3d3d3a'];
+    : ['#2563eb', '#ea580c', '#16a34a', '#7c3aed', '#db2777', '#4b5563', '#1f2937'];
 
   const labelColor = isDark ? '#80838d' : '#6c6a64';
 
@@ -74,7 +74,7 @@ const ClauseFrequencyChart = ({ contracts }) => {
               color: isDark ? '#ffffff' : '#141413',
               fontSize: '11px'
             }}
-            cursor={{ fill: isDark ? 'rgba(157, 235, 85, 0.04)' : 'rgba(204, 120, 92, 0.06)' }}
+            cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.04)' : 'rgba(37, 99, 235, 0.06)' }}
           />
           <Bar dataKey="frequency" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
