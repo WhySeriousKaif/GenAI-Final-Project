@@ -118,7 +118,6 @@ const ContractDetails = () => {
               <ExportReportButton contract={contract} />
             </div>
           </div>
-          </div>
 
           {/* TAB 1: RISK ANALYSIS */}
           {activeTab === 'risks' && (
