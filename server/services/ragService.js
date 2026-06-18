@@ -110,7 +110,7 @@ const searchRelevantContext = async (contractText, query, topK = 3) => {
   // Case 1: Online Mode (using Gemini text-embedding-004 API)
   if (genAI) {
     try {
-      const embedModel = genAI.getGenerativeModel({ model: 'gemini-embedding-2' });
+      const embedModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
       // Embed the user's query
       const queryEmbedResult = await embedModel.embedContent(query);
