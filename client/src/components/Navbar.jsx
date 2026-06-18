@@ -50,23 +50,48 @@ const Navbar = () => {
           
           {/* Brand Logo & Name */}
           <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-            <div className="p-1.5 bg-linear-to-br from-primary to-primary-active rounded-xl shadow-sm group-hover:scale-105 transition-transform duration-200">
-              <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#nav-shield-gradient)" />
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="11" r="2.5" fill="#ffffff" />
-                <circle cx="12" cy="6" r="1.5" fill="#93c5fd" />
-                <circle cx="8" cy="13" r="1.5" fill="#93c5fd" />
-                <circle cx="16" cy="13" r="1.5" fill="#93c5fd" />
-                <line x1="12" y1="7.5" x2="12" y2="9.5" stroke="#bfdbfe" strokeWidth="1" />
-                <line x1="9.5" y1="12.5" x2="11" y2="11.5" stroke="#bfdbfe" strokeWidth="1" />
-                <line x1="14.5" y1="12.5" x2="13" y2="11.5" stroke="#bfdbfe" strokeWidth="1" />
+            <div className="p-1 bg-surface-card rounded-xl shadow-xs border border-hairline group-hover:scale-105 transition-transform duration-200">
+              <svg className="h-6.5 w-6.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
                 <defs>
-                  <linearGradient id="nav-shield-gradient" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#1e3a8a" />
+                  <linearGradient id="nav-shield-left-grad" x1="16" y1="2" x2="6" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#3b82f6" />
                     <stop offset="100%" stopColor="#1d4ed8" />
                   </linearGradient>
+                  <linearGradient id="nav-shield-right-grad" x1="16" y1="2" x2="26" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#64748b" />
+                    <stop offset="100%" stopColor="#334155" />
+                  </linearGradient>
                 </defs>
+
+                {/* Left Shield Half */}
+                <path d="M16 2.5 L6.5 6.5 V15 C6.5 21 12 26 16 29" stroke="url(#nav-shield-left-grad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                
+                {/* Right Shield Half */}
+                <path d="M16 2.5 L25.5 6.5 V15 C25.5 21 20 26 16 29" stroke="url(#nav-shield-right-grad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+                {/* Monogram L */}
+                <path d="M11 9 V22 H15" stroke="url(#nav-shield-left-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                
+                {/* Monogram C */}
+                <path d="M21 9 H18.5 C16.5 9 16.5 22 18.5 22 H21" stroke="url(#nav-shield-right-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+                {/* Central Column of Scales */}
+                <path d="M16 8 V24" stroke="url(#nav-shield-right-grad)" strokeWidth="1.5" strokeLinecap="round" />
+                {/* Stand base */}
+                <path d="M14 24 H18" stroke="url(#nav-shield-right-grad)" strokeWidth="2" strokeLinecap="round" />
+
+                {/* Scales Crossbar */}
+                <path d="M10 11 H22" stroke="url(#nav-shield-right-grad)" strokeWidth="1.5" strokeLinecap="round" />
+
+                {/* Left Cup Suspension Strings */}
+                <path d="M10 11 L8 17 M10 11 L12 17" stroke="url(#nav-shield-left-grad)" strokeWidth="1" />
+                {/* Left Cup */}
+                <path d="M7.5 17 H12.5 C12.5 19.5 7.5 19.5 7.5 17 Z" fill="url(#nav-shield-left-grad)" />
+
+                {/* Right Cup Suspension Strings */}
+                <path d="M22 11 L20 17 M22 11 L24 17" stroke="url(#nav-shield-right-grad)" strokeWidth="1" />
+                {/* Right Cup */}
+                <path d="M19.5 17 H24.5 C24.5 19.5 19.5 19.5 19.5 17 Z" fill="url(#nav-shield-right-grad)" />
               </svg>
             </div>
             <div>
