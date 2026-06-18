@@ -21,11 +21,21 @@ if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
   genAI = new GoogleGenerativeAI(apiKey);
 }
 
+// Embedding configuration. Kept as constants so generation and retrieval always
+// agree, and so a stored cache can be validated against the current model.
+const EMBEDDING_MODEL = 'text-embedding-004';
+const CHUNK_SIZE = 800;
+const CHUNK_OVERLAP = 200;
+
+// MongoDB caps a single document at 16MB. We stay under a 15MB safety threshold
+// (leaving headroom for rawText, clauses, and BSON overhead) before caching vectors.
+const MAX_DOC_BYTES = 15 * 1024 * 1024;
+
 /**
  * Splits a long text string into smaller chunks with overlapping text.
  * Overlaps ensure context is not lost at the boundary of a cut.
  */
-const chunkText = (text, chunkSize = 800, chunkOverlap = 200) => {
+const chunkText = (text, chunkSize = CHUNK_SIZE, chunkOverlap = CHUNK_OVERLAP) => {
   const chunks = [];
   let index = 0;
 
@@ -169,12 +179,143 @@ const searchRelevantContext = async (contractText, query, topK = 3) => {
 };
 
 /**
+ * Generates online (Gemini) embeddings for every chunk of a contract's text.
+ * This is the EXPENSIVE step — run once at upload time (or lazily on first chat),
+ * never per question. Returns null in offline mode or if embedding fails entirely,
+ * so callers can degrade gracefully without ever blocking upload/chat.
+ */
+const generateEmbeddings = async (rawText) => {
+  if (!genAI) return null; // Online-only cache; offline TF-IDF stays compute-on-demand.
+
+  const chunks = chunkText(rawText);
+  if (chunks.length === 0) return null;
+
+  try {
+    const embedModel = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+
+    // Embed all chunks; tolerate individual chunk failures (keep what succeeds).
+    const results = await Promise.all(
+      chunks.map(async (chunk, index) => {
+        try {
+          const res = await embedModel.embedContent(chunk);
+          return { index, text: chunk, vector: res.embedding.values };
+        } catch (e) {
+          console.error(`[RAG Embed] Chunk ${index} failed: ${e.message}`);
+          return null;
+        }
+      })
+    );
+
+    const embedded = results.filter(Boolean);
+    if (embedded.length === 0) return null;
+
+    return {
+      model: EMBEDDING_MODEL,
+      dimension: embedded[0].vector.length,
+      chunkSize: CHUNK_SIZE,
+      chunkOverlap: CHUNK_OVERLAP,
+      generatedAt: new Date(),
+      chunks: embedded
+    };
+  } catch (error) {
+    console.error(`[RAG Embed] Generation failed: ${error.message}`);
+    return null;
+  }
+};
+
+/**
+ * Estimates whether storing these embeddings keeps the contract document under
+ * MongoDB's 16MB ceiling. Conservative byte accounting: raw text + chunk text +
+ * 8 bytes per vector float. If it doesn't fit, the caller skips persistence and
+ * falls back to compute-on-demand for that (rare, very large) contract.
+ */
+const fitsDocLimit = (rawText, embeddings) => {
+  if (!embeddings || !embeddings.chunks) return false;
+  let bytes = rawText ? rawText.length : 0;
+  for (const c of embeddings.chunks) {
+    bytes += (c.text ? c.text.length : 0) + (c.vector ? c.vector.length * 8 : 0);
+  }
+  return bytes < MAX_DOC_BYTES;
+};
+
+/**
+ * Fast retrieval path: embeds ONLY the user's query, then runs cosine similarity
+ * against the precomputed chunk vectors. This is the whole point of the cache —
+ * one embedding call per question instead of one-per-chunk.
+ */
+const searchWithCachedVectors = async (cachedChunks, query, topK = 3) => {
+  const embedModel = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+  const queryEmbedResult = await embedModel.embedContent(query);
+  const queryVector = queryEmbedResult.embedding.values;
+
+  const scored = cachedChunks.map(c => ({
+    chunk: c.text,
+    score: cosineSimilarity(queryVector, c.vector)
+  }));
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, topK).map(item => item.chunk).join('\n\n');
+};
+
+/**
+ * Resolves the most relevant context for a question, preferring the cached
+ * online embeddings. If a contract has no valid cache (e.g. uploaded before this
+ * feature, or caching was skipped), it computes once, persists, and self-heals.
+ * Falls back to the original on-demand path (TF-IDF offline / full re-embed) on
+ * any failure so chat never breaks.
+ */
+const retrieveContext = async (contract, question, topK = 3) => {
+  if (genAI) {
+    try {
+      const cached = contract.embeddings;
+      const validCache =
+        cached &&
+        cached.model === EMBEDDING_MODEL &&
+        Array.isArray(cached.chunks) &&
+        cached.chunks.length > 0;
+
+      let chunksToUse = validCache ? cached.chunks : null;
+
+      // Lazy compute + persist for un-cached contracts (backfill self-heal).
+      if (!chunksToUse) {
+        const generated = await generateEmbeddings(contract.rawText);
+        if (generated && generated.chunks.length > 0) {
+          chunksToUse = generated.chunks;
+          if (fitsDocLimit(contract.rawText, generated)) {
+            try {
+              contract.embeddings = generated;
+              await contract.save();
+              console.log(`[RAG] Lazily cached ${generated.chunks.length} embeddings for "${contract.title}".`);
+            } catch (saveErr) {
+              console.error(`[RAG] Failed to persist lazy cache: ${saveErr.message}`);
+            }
+          } else {
+            console.warn(`[RAG] Embeddings exceed safe doc size for "${contract.title}"; using in-memory only.`);
+          }
+        }
+      } else {
+        console.log(`[RAG] Cache hit: reusing ${chunksToUse.length} stored embeddings.`);
+      }
+
+      if (chunksToUse) {
+        return await searchWithCachedVectors(chunksToUse, question, topK);
+      }
+    } catch (error) {
+      console.error(`[RAG] Cached retrieval failed, falling back: ${error.message}`);
+    }
+  }
+
+  // Offline mode, or last-resort fallback if the online cache path errored.
+  return searchRelevantContext(contract.rawText, question, topK);
+};
+
+/**
  * Core chat handler that executes vector search and queries Gemini (or mock responses) to answer.
  */
 const queryContract = async (contract, question) => {
-  // 1. Perform semantic retrieval to pull matching passages
-  const contextText = await searchRelevantContext(contract.rawText, question, 3);
-  
+  // 1. Perform semantic retrieval to pull matching passages (cache-first)
+  const contextText = await retrieveContext(contract, question, 3);
+
   console.log(`[RAG] Found context length: ${contextText.length} characters.`);
 
   // 2. Query Gemini model using context
@@ -251,5 +392,8 @@ module.exports = {
   chunkText,
   cosineSimilarity,
   searchRelevantContext,
+  generateEmbeddings,
+  fitsDocLimit,
+  retrieveContext,
   queryContract
 };

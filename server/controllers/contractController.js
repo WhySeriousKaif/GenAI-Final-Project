@@ -12,6 +12,7 @@ const fs = require('fs');
 const Contract = require('../models/Contract');
 const { extractTextFromFile } = require('../services/textExtractor');
 const { analyzeContractText, generateExecutiveSummary } = require('../services/aiService');
+const { generateEmbeddings, fitsDocLimit } = require('../services/ragService');
 const { syncContractToGraph, deleteContractFromGraph, getContractGraphData } = require('../services/neo4jService');
 
 /**
@@ -81,6 +82,25 @@ const uploadAndAnalyzeContract = async (req, res) => {
       summary: summary,
       overallRiskScore: overallRiskScore
     });
+
+    // Step E.5: Precompute and cache online embeddings so RAG chat is fast (one
+    // query embedding per question instead of re-embedding the whole document).
+    // Runs inline since upload already awaits the AI pipeline. Online-only, and
+    // skipped if vectors would push the document past MongoDB's 16MB limit.
+    // Never blocks the upload — chat lazily computes embeddings if this is skipped.
+    try {
+      const embeddings = await generateEmbeddings(extractedText);
+      if (embeddings) {
+        if (fitsDocLimit(extractedText, embeddings)) {
+          newContract.embeddings = embeddings;
+          console.log(`[Controller] Cached ${embeddings.chunks.length} chunk embeddings for RAG.`);
+        } else {
+          console.warn('[Controller] Embeddings exceed safe document size; skipping cache (chat will compute on demand).');
+        }
+      }
+    } catch (embedError) {
+      console.error(`[Embedding Cache Error]: ${embedError.message}`);
+    }
 
     const savedContract = await newContract.save();
 

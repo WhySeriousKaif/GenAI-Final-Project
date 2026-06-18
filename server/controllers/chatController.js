@@ -23,8 +23,10 @@ const chatWithContract = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Question cannot be empty.' });
     }
 
-    // 1. Retrieve the contract from MongoDB to get its rawText and metadata
-    const contract = await Contract.findById(contractId);
+    // 1. Retrieve the contract from MongoDB to get its rawText and metadata.
+    // Explicitly include `embeddings` (marked select:false) so the RAG service
+    // can reuse the cached chunk vectors instead of re-embedding the document.
+    const contract = await Contract.findById(contractId).select('+embeddings');
     if (!contract) {
       return res.status(404).json({ success: false, message: 'Contract not found.' });
     }
