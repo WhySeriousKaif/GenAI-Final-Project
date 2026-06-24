@@ -131,24 +131,25 @@ const Navbar = () => {
  
             {/* Contributor Avatar Stack */}
             {user && (
-              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-navy-800/80">
-                <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Team:</span>
-                <div className="contributor-stack group">
+              <div className="hidden lg:flex items-center gap-2 ml-1 select-none" style={{ caretColor: 'transparent' }}>
+                <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider pointer-events-none">Team:</span>
+                <div className="contributor-stack contributor-stack-nav pointer-events-none">
                   {getTopContributors().map((contributor) => (
                     <div
                       key={contributor.id}
-                      className={`contributor-badge w-7 h-7 bg-linear-to-br ${contributor.avatarColor}`}
+                      className={`contributor-badge contributor-badge-static w-7 h-7 bg-linear-to-br ${contributor.avatarColor}`}
                       title={contributor.name}
+                      aria-hidden="true"
                     >
-                      {contributor.initials}
+                      <span className="pointer-events-none select-none">{contributor.initials}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
- 
+
             {user ? (
-              <div className="flex items-center gap-2 pl-3 border-l border-hairline">
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-hairline/60">
                 {/* Dark Mode Toggle */}
                 <button
                   onClick={toggle}
