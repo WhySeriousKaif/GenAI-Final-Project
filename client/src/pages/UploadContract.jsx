@@ -82,7 +82,7 @@ const UploadContract = () => {
       setPipelineStep('Step 1: Extracting raw text from document buffer...');
       await new Promise(r => setTimeout(r, 1000));
       
-      setPipelineStep('Step 2: Processing text with Google Gemini AI...');
+      setPipelineStep('Step 2: Processing text with OpenAI ChatGPT...');
       await new Promise(r => setTimeout(r, 1000));
       
       setPipelineStep('Step 3: Calculating clause risk levels and mapping standards...');

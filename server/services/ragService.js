@@ -226,7 +226,7 @@ const retrieveContext = async (contract, question, topK = TOP_K) => {
 
 /**
  * Core chat handler: retrieve context (cache-first), then delegate answer
- * generation to the provider (Gemini online with offline keyword fallback).
+ * generation to the provider (OpenAI online with offline keyword fallback).
  */
 const queryContract = async (contract, question) => {
   const contextText = await retrieveContext(contract, question, TOP_K);

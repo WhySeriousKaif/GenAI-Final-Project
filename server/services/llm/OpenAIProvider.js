@@ -1,8 +1,8 @@
 // =========================================================================
-// GeminiProvider — Online LLM implementation (Google Gemini)
+// OpenAIProvider — Online LLM implementation (OpenAI ChatGPT)
 // =========================================================================
-// Wraps the @google/generative-ai SDK behind the LLMProvider interface.
-// All Gemini-specific prompts and model calls live here and NOWHERE else.
+// Wraps the openai SDK behind the LLMProvider interface.
+// All OpenAI-specific prompts and model calls live here and NOWHERE else.
 
 const LLMProvider = require('./LLMProvider');
 const { CHAT_MODEL, EMBEDDING_MODEL, MAX_ANALYSIS_CHARS, MAX_SUMMARY_CHARS } = require('../../config/aiConfig');
@@ -23,7 +23,7 @@ const cleanJsonString = (rawText) => {
   return cleaned.trim();
 };
 
-class GeminiProvider extends LLMProvider {
+class OpenAIProvider extends LLMProvider {
   constructor(client) {
     super();
     this.client = client;
@@ -34,11 +34,6 @@ class GeminiProvider extends LLMProvider {
   }
 
   async analyzeClauses(rawText) {
-    const model = this.client.getGenerativeModel({
-      model: CHAT_MODEL,
-      generationConfig: { responseMimeType: 'application/json' }
-    });
-
     const prompt = `
         You are an elite legal AI contracts analyst. Read the following contract text.
         Extract all major legal clauses belonging to these categories:
@@ -73,36 +68,39 @@ class GeminiProvider extends LLMProvider {
            - 'Unusual': Weird, atypical, or extremely outdated terms.
         8. Describe how it compares in 'marketComparisonReason'.
 
-        Return the result strictly as a JSON array of objects. Do not wrap in markdown tags.
+        Return the result strictly as a JSON object with a "clauses" array. Do not wrap in markdown tags.
         JSON format:
-        [
-          {
-            "clauseType": "Limitation of Liability",
-            "clauseText": "The text of the clause...",
-            "sectionNumber": "Section 9.1",
-            "riskType": "Financial",
-            "riskScore": 75,
-            "reason": "Liability is completely unlimited, exposing the customer to infinite financial risk.",
-            "marketStandardStatus": "Unfavourable",
-            "marketComparisonReason": "Deviates from standard contract value cap."
-          }
-        ]
+        {
+          "clauses": [
+            {
+              "clauseType": "Limitation of Liability",
+              "clauseText": "The text of the clause...",
+              "sectionNumber": "Section 9.1",
+              "riskType": "Financial",
+              "riskScore": 75,
+              "reason": "Liability is completely unlimited, exposing the customer to infinite financial risk.",
+              "marketStandardStatus": "Unfavourable",
+              "marketComparisonReason": "Deviates from standard contract value cap."
+            }
+          ]
+        }
 
         Contract Text:
         ${rawText.substring(0, MAX_ANALYSIS_CHARS)} // Truncated to fit within model constraints if huge
       `;
 
-    const result = await model.generateContent(prompt);
-    const cleaned = cleanJsonString(result.response.text());
-    return JSON.parse(cleaned);
+    const response = await this.client.chat.completions.create({
+      model: CHAT_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' }
+    });
+
+    const cleaned = cleanJsonString(response.choices[0].message.content);
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : parsed.clauses || [];
   }
 
   async summarize(rawText, clauses) {
-    const model = this.client.getGenerativeModel({
-      model: CHAT_MODEL,
-      generationConfig: { responseMimeType: 'application/json' }
-    });
-
     const prompt = `
         You are a senior corporate lawyer. Write a plain-English, one-page Executive Summary of the contract.
 
@@ -131,20 +129,27 @@ class GeminiProvider extends LLMProvider {
         ${rawText.substring(0, MAX_SUMMARY_CHARS)}
       `;
 
-    const result = await model.generateContent(prompt);
-    const cleaned = cleanJsonString(result.response.text());
+    const response = await this.client.chat.completions.create({
+      model: CHAT_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' }
+    });
+
+    const cleaned = cleanJsonString(response.choices[0].message.content);
     return JSON.parse(cleaned);
   }
 
   async embed(texts) {
-    const model = this.client.getGenerativeModel({ model: EMBEDDING_MODEL });
     return Promise.all(
       texts.map(async (text) => {
         try {
-          const res = await model.embedContent(text);
-          return res.embedding.values;
+          const res = await this.client.embeddings.create({
+            model: EMBEDDING_MODEL,
+            input: text
+          });
+          return res.data[0].embedding;
         } catch (e) {
-          console.error(`[GeminiProvider] Embedding failed for a chunk: ${e.message}`);
+          console.error(`[OpenAIProvider] Embedding failed for a chunk: ${e.message}`);
           return null;
         }
       })
@@ -152,8 +157,6 @@ class GeminiProvider extends LLMProvider {
   }
 
   async answer(contextText, question) {
-    const model = this.client.getGenerativeModel({ model: CHAT_MODEL });
-
     const prompt = `
         You are a highly helpful legal assistant for the Legal Document Intelligence System.
         Your goal is to answer questions about a legal contract using ONLY the provided verified context.
@@ -169,9 +172,13 @@ class GeminiProvider extends LLMProvider {
         Answer:
       `;
 
-    const result = await model.generateContent(prompt);
-    return { answer: result.response.text(), mode: 'AI (Gemini)' };
+    const response = await this.client.chat.completions.create({
+      model: CHAT_MODEL,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    return { answer: response.choices[0].message.content, mode: 'AI (OpenAI)' };
   }
 }
 
-module.exports = GeminiProvider;
+module.exports = OpenAIProvider;

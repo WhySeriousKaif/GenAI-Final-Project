@@ -4,7 +4,7 @@
 // This module is now a thin facade. All vendor-specific logic lives behind the
 // LLMProvider abstraction (services/llm). Consumers keep the same API
 // (analyzeContractText / generateExecutiveSummary) while the implementation —
-// Gemini online with offline mock fallback — is selected by the provider factory.
+// OpenAI online with offline mock fallback — is selected by the provider factory.
 
 const { getProvider } = require('./llm');
 

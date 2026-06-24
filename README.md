@@ -4,13 +4,13 @@ A full-stack **Legal Document Intelligence System** built on the MERN stack (Mon
 
 It automates the parsing of commercial agreements (PDF & DOCX), extracts core clauses (Indemnity, Payment Terms, Limitation of Liability, etc.), scores their risk with AI, compares clauses across contracts, searches keywords globally, and lets you chat with a document via a cached **Retrieval-Augmented Generation (RAG)** pipeline.
 
-The backend is built around clean **Low-Level Design (LLD)** principles: a vendor-agnostic LLM provider abstraction, data-driven rule engines, a thin-controller/service split, centralized configuration and error handling, and a Jest test suite. The app degrades gracefully — it runs fully **offline** (no Gemini key, no Neo4j) without ever crashing.
+The backend is built around clean **Low-Level Design (LLD)** principles: a vendor-agnostic LLM provider abstraction, data-driven rule engines, a thin-controller/service split, centralized configuration and error handling, and a Jest test suite. The app degrades gracefully — it runs fully **offline** (no OpenAI key, no Neo4j) without ever crashing.
 
 ---
 
 ## 🏗️ System Architecture & Data Flow
 
-Documents are ingested, processed by a swappable LLM provider (Gemini online / heuristic mock offline), persisted in MongoDB, mirrored into a Neo4j graph (or an in-memory fallback), and queried through a cache-first RAG pipeline.
+Documents are ingested, processed by a swappable LLM provider (OpenAI online / heuristic mock offline), persisted in MongoDB, mirrored into a Neo4j graph (or an in-memory fallback), and queried through a cache-first RAG pipeline.
 
 ```mermaid
 flowchart TB
@@ -32,9 +32,9 @@ flowchart TB
     subgraph AI["LLM Provider Layer"]
         direction TB
         Provider{{"Provider Factory"}}
-        Gemini["GeminiProvider<br/>gemini-2.5-flash<br/>text-embedding-004"]
+        OpenAI["OpenAIProvider<br/>gpt-4o-mini<br/>text-embedding-3-small"]
         Mock["MockProvider<br/>rule registries, TF-IDF"]
-        Provider -->|online| Gemini
+        Provider -->|online| OpenAI
         Provider -.->|offline / on-error| Mock
     end
 
@@ -69,7 +69,7 @@ flowchart TB
     class User client
     class Routes,Chat api
     class Ingest,TextExt,RAG core
-    class Provider,Gemini,Mock ai
+    class Provider,OpenAI,Mock ai
     class Mongo,Neo4j data
 ```
 
@@ -86,7 +86,7 @@ flowchart TB
 7. **Cached RAG Chat Console** — chat with a contract; a side-drawer shows the exact context chunks retrieved by vector similarity. Embeddings are computed **once at upload** and reused (one query embedding per question).
 8. **Interactive Relationship Graph** — node-link view mapping contracts → clauses with cross-references.
 9. **JWT Authentication & Roles** — register/login with `user` / `admin` roles; all contract & chat routes are protected; admin-only database reset.
-10. **Admin Status Monitor** — live health checks for MongoDB, Gemini, and Neo4j with a one-click reset.
+10. **Admin Status Monitor** — live health checks for MongoDB, OpenAI, and Neo4j with a one-click reset.
 11. **Light/Dark Theme** — persisted theme toggle, plus clause copy-to-clipboard and JSON report export.
 
 ---
@@ -96,7 +96,7 @@ flowchart TB
 * **Frontend:** React 19, Vite, Tailwind CSS v4, Recharts, Lucide React, Axios, React Router v7.
 * **Backend:** Node.js, Express.js, Multer (multipart uploads), JWT (`jsonwebtoken`), `bcryptjs`.
 * **Database:** MongoDB & Mongoose (primary store), Neo4j & Cypher driver (graph cross-references, optional).
-* **AI Engine:** Google Gemini (`gemini-2.5-flash` for analysis/chat, `text-embedding-004` for embeddings) with an offline heuristic fallback.
+* **AI Engine:** OpenAI (`gpt-4o-mini` for analysis/chat, `text-embedding-3-small` for embeddings) with an offline heuristic fallback.
 * **Document Parsers:** Mammoth (DOCX), PDF-Parse (PDF). **Sample Generator:** PDFKit.
 * **Testing:** Jest + Supertest (backend), ESLint (frontend).
 
@@ -109,7 +109,7 @@ The backend follows a layered design so responsibilities stay isolated and exten
 ```
 server/
 ├── config/
-│   ├── aiConfig.js          # Single source of truth: Gemini client, model ids, tunables
+│   ├── aiConfig.js          # Single source of truth: OpenAI client, model ids, tunables
 │   └── db.js                # MongoDB connection
 ├── constants/
 │   └── clauseTypes.js       # Shared clause taxonomy + risk/market enums
@@ -125,9 +125,9 @@ server/
 │   ├── aiService.js                  # Thin facade over the provider layer
 │   ├── llm/                          # LLM Provider abstraction (DIP / OCP / ISP)
 │   │   ├── LLMProvider.js            #   interface
-│   │   ├── GeminiProvider.js         #   online implementation
+│   │   ├── OpenAIProvider.js         #   online implementation
 │   │   ├── MockProvider.js           #   offline heuristic implementation
-│   │   ├── FallbackProvider.js       #   Gemini-with-offline-fallback composite
+│   │   ├── FallbackProvider.js       #   OpenAI-with-offline-fallback composite
 │   │   └── index.js                  #   provider factory (singleton)
 │   └── rules/                        # Data-driven rule registries (OCP)
 │       ├── clauseRules.js            #   clause extraction registry + engine
@@ -148,10 +148,10 @@ server/
 ```
 
 **Design highlights**
-- **Dependency Inversion:** business logic depends on the `LLMProvider` interface, not on the Gemini SDK. Swapping providers = a new subclass, no consumer edits.
+- **Dependency Inversion:** business logic depends on the `LLMProvider` interface, not on the OpenAI SDK. Swapping providers = a new subclass, no consumer edits.
 - **Open/Closed:** clause types, chat intents, and file formats are declarative registry entries — the engines never change.
 - **Single Responsibility:** controllers only translate HTTP; the ingestion pipeline lives in a service.
-- **Resilience:** `FallbackProvider` transparently degrades Gemini → offline heuristics per operation, so the app never crashes on a missing key or API error.
+- **Resilience:** `FallbackProvider` transparently degrades OpenAI → offline heuristics per operation, so the app never crashes on a missing key or API error.
 - **Embedding cache:** chunk vectors are computed once at upload and stored on the contract (under MongoDB's 16 MB doc limit); chat embeds only the query. Old contracts self-heal on first chat.
 
 ---
@@ -178,7 +178,7 @@ server/
 * `POST /api/chat/:id` — chat with a contract. Body: `{ "question": "Who owns the IP?" }`.
 
 ### 5. Admin Utilities *(protected)*
-* `GET /api/admin/status` — connectivity of MongoDB, Gemini, and Neo4j.
+* `GET /api/admin/status` — connectivity of MongoDB, OpenAI, and Neo4j.
 * `POST /api/admin/reset-db` — wipe all records *(admin role only)*.
 
 ---
@@ -190,13 +190,13 @@ Create a `.env` file in `server/` (see `server/.env.example`):
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/legal_doc_intel
-GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_KEY
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 JWT_SECRET=change_this_to_a_long_random_secret
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=yourpassword
 ```
-> If `GEMINI_API_KEY` is omitted, the app runs in **Offline Heuristics** mode (and skips embedding caching, using TF-IDF retrieval). If Neo4j parameters are omitted or unreachable, it falls back to an **in-memory graph**.
+> If `OPENAI_API_KEY` is omitted, the app runs in **Offline Heuristics** mode (and skips embedding caching, using TF-IDF retrieval). If Neo4j parameters are omitted or unreachable, it falls back to an **in-memory graph**.
 
 ### Step 2: Backend
 ```bash
@@ -237,8 +237,8 @@ The backend suite (8 suites / 41 tests) characterizes the AI/RAG/extraction laye
 
 ## 💡 Academic & Viva Presentation Tips
 
-1. **Offline Resiliency:** With no `GEMINI_API_KEY`, the `FallbackProvider` activates the offline heuristic engine — clause extraction, risk scores, summaries, and chat all still work. The app **never crashes** without internet.
-2. **RAG Explanation:** Contract text is split into ~800-character overlapping chunks, embedded with `text-embedding-004` **once at upload** and cached; each question only embeds the query and ranks chunks by cosine similarity. Offline, a TF-IDF keyword vectorizer is used instead. The **Context Source** drawer shows the exact chunks fed to the model.
+1. **Offline Resiliency:** With no `OPENAI_API_KEY`, the `FallbackProvider` activates the offline heuristic engine — clause extraction, risk scores, summaries, and chat all still work. The app **never crashes** without internet.
+2. **RAG Explanation:** Contract text is split into ~800-character overlapping chunks, embedded with `text-embedding-3-small` **once at upload** and cached; each question only embeds the query and ranks chunks by cosine similarity. Offline, a TF-IDF keyword vectorizer is used instead. The **Context Source** drawer shows the exact chunks fed to the model.
 3. **Clean Architecture:** Walk through the `LLMProvider` abstraction (`services/llm/`) and the rule registries (`services/rules/`) to show Dependency Inversion and Open/Closed in action — and the Jest suite that guards them.
 4. **Graph Database Fallback:** Neo4j stores `(:Contract)-[:CONTAINS]->(:Clause)` and `(:Clause)-[:REFERENCES]->(:Clause)`. If offline, the same structure is built in memory and rendered as an interactive SVG.
 </content>

@@ -109,7 +109,7 @@ export const chatWithContract = async (contractId, question) => {
  * 4. SYSTEM ADMIN UTILITIES
  */
 
-// Queries MongoDB connection, Gemini status, and Neo4j status
+// Queries MongoDB connection, OpenAI status, and Neo4j status
 export const getSystemStatus = async () => {
   const response = await apiClient.get('/admin/status');
   return response.data;

@@ -1,7 +1,7 @@
 // =========================================================================
 // FallbackProvider — Resilience composite (Strategy + graceful degradation)
 // =========================================================================
-// Wraps a primary provider (Gemini) and a fallback (Mock). Each operation tries
+// Wraps a primary provider (OpenAI) and a fallback (Mock). Each operation tries
 // the primary; on ANY failure it transparently degrades to the fallback. This
 // preserves the app's original "never crash offline / on API error" guarantee,
 // now expressed as a single reusable composition instead of try/catch scattered

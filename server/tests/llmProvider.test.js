@@ -1,30 +1,38 @@
 // Tests for the LLM provider abstraction (P2).
-// Uses a fake Gemini client — no network. Verifies the online provider, the
+// Uses a fake OpenAI client — no network. Verifies the online provider, the
 // offline mock provider, and the fallback-degradation composition.
 
-const GeminiProvider = require('../services/llm/GeminiProvider');
+const OpenAIProvider = require('../services/llm/OpenAIProvider');
 const MockProvider = require('../services/llm/MockProvider');
 const FallbackProvider = require('../services/llm/FallbackProvider');
 
-const fakeClient = (overrides = {}) => ({
-  getGenerativeModel: () => ({
-    generateContent: async (prompt) => ({
-      response: {
-        text: () =>
-          prompt.includes('Executive Summary')
-            ? '{"purpose":"p","parties":[],"keyObligations":[],"topRisks":[],"negotiationPoints":[],"overallRiskScore":40}'
-            : prompt.includes('legal assistant')
-            ? 'A Gemini answer.'
-            : '[{"clauseType":"Indemnity","clauseText":"t","sectionNumber":"S1","riskType":"Legal","riskScore":50,"reason":"r","marketStandardStatus":"Favourable","marketComparisonReason":"m"}]'
+const fakeClient = () => ({
+  chat: {
+    completions: {
+      create: async ({ messages }) => {
+        const prompt = messages[0].content;
+        return {
+          choices: [{
+            message: {
+              content:
+                prompt.includes('Executive Summary')
+                  ? '{"purpose":"p","parties":[],"keyObligations":[],"topRisks":[],"negotiationPoints":[],"overallRiskScore":40}'
+                  : prompt.includes('legal assistant')
+                  ? 'An OpenAI answer.'
+                  : '{"clauses":[{"clauseType":"Indemnity","clauseText":"t","sectionNumber":"S1","riskType":"Legal","riskScore":50,"reason":"r","marketStandardStatus":"Favourable","marketComparisonReason":"m"}]}'
+            }
+          }]
+        };
       }
-    }),
-    embedContent: async () => ({ embedding: { values: [0.1, 0.2, 0.3] } }),
-    ...overrides
-  })
+    }
+  },
+  embeddings: {
+    create: async () => ({ data: [{ embedding: [0.1, 0.2, 0.3] }] })
+  }
 });
 
-describe('GeminiProvider (online, faked client)', () => {
-  const gp = new GeminiProvider(fakeClient());
+describe('OpenAIProvider (online, faked client)', () => {
+  const gp = new OpenAIProvider(fakeClient());
 
   test('canEmbed is true', () => expect(gp.canEmbed).toBe(true));
 
@@ -45,10 +53,10 @@ describe('GeminiProvider (online, faked client)', () => {
     expect(vecs[0]).toEqual([0.1, 0.2, 0.3]);
   });
 
-  test('answer returns Gemini mode', async () => {
+  test('answer returns OpenAI mode', async () => {
     const res = await gp.answer('ctx', 'legal assistant query');
-    expect(res.mode).toBe('AI (Gemini)');
-    expect(res.answer).toMatch(/Gemini/);
+    expect(res.mode).toBe('AI (OpenAI)');
+    expect(res.answer).toMatch(/OpenAI/);
   });
 });
 

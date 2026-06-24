@@ -2,7 +2,7 @@
 // LLMProvider — Abstract Interface (Dependency Inversion Principle)
 // =========================================================================
 // High-level services (clause analysis, RAG chat) depend on THIS contract,
-// not on any concrete AI vendor SDK. Implementations: GeminiProvider (online),
+// not on any concrete AI vendor SDK. Implementations: OpenAIProvider (online),
 // MockProvider (offline heuristics), FallbackProvider (compose primary+fallback).
 //
 // Adding a new vendor (OpenAI, Anthropic, etc.) = new subclass, zero edits to

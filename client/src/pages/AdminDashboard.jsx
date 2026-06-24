@@ -5,7 +5,7 @@
 // the database for fresh demonstrations.
 //
 // Displays:
-// 1. Connection states of MongoDB, Gemini API, and Neo4j.
+// 1. Connection states of MongoDB, OpenAI API, and Neo4j.
 // 2. Database Reset Action (wipes MongoDB collections and deletes Neo4j nodes).
 
 import { useEffect, useState } from 'react';
@@ -84,22 +84,22 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Gemini AI */}
+        {/* OpenAI */}
         <div className="glass-card p-5 space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs text-muted font-bold uppercase tracking-wider">Cognitive Engine</span>
             <ShieldCheck className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-ink">Gemini LLM API</h3>
+            <h3 className="text-base font-semibold text-ink">OpenAI ChatGPT API</h3>
             <p className="text-xs text-muted mt-0.5">Extracts clauses, rates risks, and drives interactive RAG chat.</p>
           </div>
           <div className="pt-2 border-t border-hairline">
             {loading ? <span className="text-xs text-muted">Checking...</span>
-              : status?.gemini?.includes('Missing') ? (
+              : status?.openai?.includes('Missing') ? (
                 <span className="text-xs font-semibold text-warning flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-warning"></span>Mock Heuristics Mode</span>
               ) : (
-                <span className="text-xs font-semibold text-success flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-success"></span>Gemini Active (Online)</span>
+                <span className="text-xs font-semibold text-success flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-success"></span>OpenAI Active (Online)</span>
               )
             }
           </div>
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
         <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">University Presentation / Viva Checklist</h3>
         <ul className="text-xs text-muted space-y-2 list-disc list-inside">
           <li>Ensure <span className="font-semibold text-ink">mongod</span> is running locally or specify your Atlas URI in <span className="font-mono text-ink">server/.env</span>.</li>
-          <li>If you do not have a Gemini API key, our <span className="font-semibold text-primary">Mock Heuristics Analyser</span> will automatically engage for offline demos.</li>
+          <li>If you do not have an OpenAI API key, our <span className="font-semibold text-primary">Mock Heuristics Analyser</span> will automatically engage for offline demos.</li>
           <li>To showcase the bonus graph visualization, Neo4j is supported but not required. The visualizer defaults to in-memory graph construction if Neo4j is offline.</li>
           <li>A comprehensive <span className="font-semibold text-ink">README.md</span>, API documentation, and viva interview guide have been created in the project root folder.</li>
         </ul>

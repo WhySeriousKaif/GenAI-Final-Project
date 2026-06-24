@@ -18,7 +18,7 @@ const authRoutes = require('./routes/authRoutes');
 const { protect, authorize } = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const { checkNeo4jStatus, initNeo4j, purgeAll } = require('./services/neo4jService');
-const { isGeminiEnabled } = require('./config/aiConfig');
+const { isOpenAIEnabled } = require('./config/aiConfig');
 const asyncHandler = require('./middleware/asyncHandler');
 const Contract = require('./models/Contract');
 
@@ -48,14 +48,14 @@ app.use('/api/chat', protect, chatRoutes);
 
 // 6. Admin API (Special Utility Endpoints for Viva Demonstrations)
 app.get('/api/admin/status', protect, (req, res) => {
-  const isGeminiActive = isGeminiEnabled;
+  const isOpenAIActive = isOpenAIEnabled;
   const neo4jStatus = checkNeo4jStatus();
 
   return res.status(200).json({
     success: true,
     services: {
       mongodb: mongooseConnectionState(),
-      gemini: isGeminiActive ? 'Connected (Online AI Engine)' : 'Missing Key (Fallback Heuristics)',
+      openai: isOpenAIActive ? 'Connected (Online AI Engine)' : 'Missing Key (Fallback Heuristics)',
       neo4j: neo4jStatus.isConnected ? `Connected (${neo4jStatus.uri})` : 'Offline (Local Relationship Fallback)'
     }
   });

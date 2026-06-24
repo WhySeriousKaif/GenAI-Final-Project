@@ -90,7 +90,7 @@ const ExecutiveSummarySchema = new mongoose.Schema({
 });
 
 // 2b. EMBEDDING CACHE SCHEMA (Subdocument)
-// Stores precomputed online (Gemini) embeddings for the contract's text chunks so
+// Stores precomputed online (OpenAI) embeddings for the contract's text chunks so
 // the RAG chat does not have to re-embed the entire document on every question.
 // Only the ONLINE embedding path is cached; offline TF-IDF stays compute-on-demand.
 const EmbeddingChunkSchema = new mongoose.Schema({

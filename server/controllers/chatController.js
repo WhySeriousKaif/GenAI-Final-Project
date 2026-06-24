@@ -4,7 +4,7 @@
 // This controller handles questions asked about a specific contract.
 // It leverages our in-memory RAG (Retrieval-Augmented Generation) pipeline,
 // querying the database for the contract text, extracting key context, 
-// and formatting the final query for the Gemini model or local fallback.
+// and formatting the final query for the OpenAI model or local fallback.
 
 const Contract = require('../models/Contract');
 const asyncHandler = require('../middleware/asyncHandler');

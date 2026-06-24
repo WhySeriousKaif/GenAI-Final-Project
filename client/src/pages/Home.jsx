@@ -112,7 +112,7 @@ export default function Home() {
             </div>
             <h3 className="text-base font-semibold text-ink group-hover:text-primary transition-colors">Conversational RAG Chat</h3>
             <p className="text-muted text-sm mt-2 leading-relaxed">
-              Interrogate your agreements in real-time. The vector context assembler supplies accurate snippets directly to the Gemini LLM.
+              Interrogate your agreements in real-time. The vector context assembler supplies accurate snippets directly to the OpenAI ChatGPT model.
             </p>
           </div>
 
@@ -179,7 +179,7 @@ export default function Home() {
           <div className="bg-surface-card border border-hairline rounded-xl p-6">
             <h4 className="text-base font-semibold text-ink">Q: How does LexiCore AI perform document analysis?</h4>
             <p className="text-muted text-sm mt-2 leading-relaxed">
-              A: When a contract is uploaded, our Node.js server parses it via `pdf-parse`. The text is split into clauses, and sent to the Gemini API (or Mock Mode) which applies custom prompts to flag risks, write summaries, and identify metadata.
+              A: When a contract is uploaded, our Node.js server parses it via `pdf-parse`. The text is split into clauses, and sent to the OpenAI API (or Mock Mode) which applies custom prompts to flag risks, write summaries, and identify metadata.
             </p>
           </div>
 

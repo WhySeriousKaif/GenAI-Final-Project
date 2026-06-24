@@ -2,7 +2,7 @@
 // MockProvider — Offline heuristic implementation (no network)
 // =========================================================================
 // Implements the LLMProvider interface with regex/keyword heuristics so the
-// system runs fully offline (e.g. no GEMINI_API_KEY). This is the "bulletproof"
+// system runs fully offline (e.g. no OPENAI_API_KEY). This is the "bulletproof"
 // fallback the app has always had — now a first-class provider instead of
 // scattered fallback branches.
 //
