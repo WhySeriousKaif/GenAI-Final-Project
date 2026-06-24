@@ -177,13 +177,52 @@ const unusualSections = [
   }
 ];
 
+// =========================================================================
+// CONTRACT 4: NDA & MASTER SERVICES AGREEMENT (Mixed Risk / Confidentiality Focus)
+// =========================================================================
+const msaSections = [
+  {
+    heading: "PREAMBLE",
+    text: "This Non-Disclosure and Master Services Agreement (the 'Agreement') is made effective as of July 1, 2026, between DataVault Analytics Ltd. ('Service Provider') and TechGrowth Enterprises Inc. ('Client')."
+  },
+  {
+    heading: "ARTICLE 2: CONFIDENTIALITY OBLIGATIONS",
+    text: "Each party agrees to hold in strict confidence all Confidential Information disclosed by the other party for a period of five (5) years following termination of this Agreement. Confidential Information shall not be disclosed to any third party except as required by law, and each party shall use Confidential Information solely for the purpose of performing obligations under this Agreement."
+  },
+  {
+    heading: "Section 3.2: PAYMENT TERMS",
+    text: "Client shall pay all undisputed invoices within forty-five (45) days of invoice date. Service Provider may suspend services if any invoice remains unpaid for more than sixty (60) days. All fees are exclusive of applicable taxes, which Client shall pay."
+  },
+  {
+    heading: "Section 5.1: TERMINATION",
+    text: "Either party may terminate this Agreement upon forty-five (45) days prior written notice. Service Provider may terminate immediately upon Client's material breach of confidentiality obligations or failure to pay fees within the cure period of fifteen (15) days after written notice."
+  },
+  {
+    heading: "Section 7.3: INTELLECTUAL PROPERTY OWNERSHIP",
+    text: "Client owns all deliverables specifically created for Client under a Statement of Work upon full payment. Service Provider retains all rights to its pre-existing methodologies, frameworks, and generic software components. Jointly developed improvements shall be owned jointly unless otherwise agreed in writing."
+  },
+  {
+    heading: "Section 8.4: INDEMNIFICATION",
+    text: "Service Provider shall indemnify Client against third-party claims alleging that the deliverables infringe a U.S. patent or copyright, provided Client gives prompt notice and allows Service Provider to control defense. Client shall indemnify Service Provider against claims arising from Client's misuse of deliverables or violation of applicable law."
+  },
+  {
+    heading: "Section 10.2: LIMITATION OF LIABILITY",
+    text: "Except for breaches of confidentiality or indemnification obligations, each party's total liability under this Agreement shall not exceed two times (2x) the fees paid or payable in the twelve (12) months preceding the claim. Neither party shall be liable for lost profits, loss of data, or indirect damages."
+  },
+  {
+    heading: "Section 15.1: GOVERNING LAW AND DISPUTE RESOLUTION",
+    text: "This Agreement shall be governed by the laws of the State of New York, without regard to conflict-of-law principles. Any dispute shall first be submitted to good-faith negotiation, followed by binding arbitration in New York City under the rules of the American Arbitration Association."
+  }
+];
+
 // Execute the Generator
 const generate = async () => {
   try {
     await createContractPDF('Standard_SaaS_Agreement.pdf', 'Standard Software as a Service Agreement', saasSections);
     await createContractPDF('Risky_Vendor_Contract.pdf', 'Apex Hardware Master Agreement', riskySections);
     await createContractPDF('Service_Agreement_Foreign_Jurisdiction.pdf', 'Helvetica Consulting Services Agreement', unusualSections);
-    console.log('[PDF Generator] Successfully generated all 3 sample contracts.');
+    await createContractPDF('NDA_Master_Services_Agreement.pdf', 'Non-Disclosure & Master Services Agreement', msaSections);
+    console.log('[PDF Generator] Successfully generated all 4 sample contracts.');
   } catch (error) {
     console.error(`[PDF Generator Error]: ${error.message}`);
   }

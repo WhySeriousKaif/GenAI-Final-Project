@@ -350,4 +350,53 @@ html.dark {
     border: 1px solid var(--color-hairline);
     @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium;
   }
+
+  /* Hero animated background overlays */
+  .hero-bg-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(60px);
+    opacity: 0.55;
+    animation: hero-orb-drift 14s ease-in-out infinite alternate;
+  }
+
+  .hero-bg-orb-left {
+    width: 420px;
+    height: 420px;
+    top: 8%;
+    left: 6%;
+    background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+
+  .hero-bg-orb-right {
+    width: 360px;
+    height: 360px;
+    bottom: 10%;
+    right: 8%;
+    background: color-mix(in srgb, var(--color-primary) 28%, transparent);
+    animation-delay: -5s;
+  }
+
+  @keyframes hero-orb-drift {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(24px, -18px) scale(1.08); }
+  }
+
+  .hero-bg-vignette {
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 45%, transparent 0%, transparent 42%, color-mix(in srgb, var(--color-canvas) 35%, transparent) 100%),
+      linear-gradient(to bottom, transparent 70%, var(--color-canvas) 100%);
+    opacity: 0.85;
+  }
+
+  .hero-bg-fade {
+    background: linear-gradient(to bottom, transparent, var(--color-canvas));
+    opacity: 0.9;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg-orb {
+      animation: none;
+    }
+  }
 }

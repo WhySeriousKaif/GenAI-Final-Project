@@ -5,6 +5,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Terminal, Shield, Cpu, Activity, Database, Layers, BrainCircuit } from 'lucide-react';
+import HeroBackground from '../components/HeroBackground';
 
 export default function Home() {
   const { user } = useAuth();
@@ -24,45 +25,45 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-canvas text-body font-sans">
-      
-      {/* Background radial effects */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10 animate-glow"></div>
-      <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] bg-surface-cream-strong/40 rounded-full blur-3xl -z-10 animate-glow" style={{ animationDelay: '-3s' }}></div>
 
       {/* 1. HERO SECTION */}
-      <section className="max-w-[85rem] mx-auto px-6 pt-24 pb-16 text-center relative">
-        {/* Top small badge */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-card border border-hairline rounded-full text-xs font-semibold text-primary mb-6 tracking-wide uppercase">
-          <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
-          Autonomous Legal Intelligence
-        </div>
+      <section className="relative overflow-hidden min-h-[88vh] flex flex-col justify-center pb-[12vh] md:pb-[16vh]">
+        <HeroBackground />
 
-        {/* Big Bold Headline */}
-        <h1 className="text-6xl md:text-7xl font-serif text-ink leading-tight tracking-tight max-w-4xl mx-auto font-medium">
-          Vision-Driven Multimodal Autonomous Legal Workspace
-        </h1>
+        <div className="relative z-10 max-w-[85rem] mx-auto px-6 pt-12 md:pt-16 pb-10 text-center">
+          {/* Top small badge */}
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-card/80 border border-hairline rounded-full text-xs font-semibold text-primary mb-6 tracking-wide uppercase backdrop-blur-sm">
+            <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
+            Autonomous Legal Intelligence
+          </div>
 
-        {/* Subtitle */}
-        <p className="text-muted text-base max-w-2xl mx-auto mt-6 leading-relaxed">
-          Bypass brittle manual document scanning and generic parsers. LexiCore AI orchestrates 
-          automated risk evaluation, semantic clause matching, and relationship extraction in a warm-canvas workspace.
-        </p>
+          {/* Big Bold Headline */}
+          <h1 className="text-6xl md:text-7xl font-serif text-ink leading-tight tracking-tight max-w-4xl mx-auto font-medium">
+            Vision-Driven Multimodal Autonomous Legal Workspace
+          </h1>
 
-        {/* Hero CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8">
-          <button
-            onClick={handleCtaClick}
-            className="btn-primary px-8 py-3.5 text-sm"
-          >
-            <Terminal className="w-4.5 h-4.5" />
-            Open Interactive Console
-          </button>
-          <button
-            onClick={scrollToSpecs}
-            className="btn-secondary px-8 py-3.5 text-sm"
-          >
-            Read System Specs
-          </button>
+          {/* Subtitle */}
+          <p className="text-muted text-base max-w-2xl mx-auto mt-6 leading-relaxed">
+            Bypass brittle manual document scanning and generic parsers. LexiCore AI orchestrates 
+            automated risk evaluation, semantic clause matching, and relationship extraction in a warm-canvas workspace.
+          </p>
+
+          {/* Hero CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8">
+            <button
+              onClick={handleCtaClick}
+              className="btn-primary px-8 py-3.5 text-sm shadow-lg shadow-primary/20"
+            >
+              <Terminal className="w-4.5 h-4.5" />
+              Open Interactive Console
+            </button>
+            <button
+              onClick={scrollToSpecs}
+              className="btn-secondary px-8 py-3.5 text-sm backdrop-blur-sm bg-surface-card/70"
+            >
+              Read System Specs
+            </button>
+          </div>
         </div>
       </section>
 
